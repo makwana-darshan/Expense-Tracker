@@ -13,6 +13,8 @@ import com.expensetracker.dto.ResponseStructure;
 import com.expensetracker.entity.User;
 import com.expensetracker.service.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -21,7 +23,7 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping("/saveUser")
-	public ResponseEntity<ResponseStructure<User>> saveUser(@RequestBody User user) {
+	public ResponseEntity<ResponseStructure<User>> saveUser(@Valid @RequestBody User user) {
 		return userService.saveUser(user);
 	}
 
@@ -31,7 +33,7 @@ public class UserController {
 	}
 
 	@PutMapping("/changePassword")
-	public ResponseEntity<ResponseStructure<String>> changePassword(@RequestBody ChangePasswordRequest request) {
+	public ResponseEntity<ResponseStructure<String>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
 		return userService.changePassword(request);
 	}
 }

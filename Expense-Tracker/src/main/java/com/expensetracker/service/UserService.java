@@ -10,6 +10,8 @@ import com.expensetracker.dao.UserDao;
 import com.expensetracker.dto.ChangePasswordRequest;
 import com.expensetracker.dto.ResponseStructure;
 import com.expensetracker.entity.User;
+import com.expensetracker.exception.DuplicateEmailException;
+import com.expensetracker.exception.UserNotFoundException;
 
 @Service
 public class UserService {
@@ -23,10 +25,7 @@ public class UserService {
 	public ResponseEntity<ResponseStructure<User>> saveUser(User user) {
 		ResponseStructure<User> response = new ResponseStructure<>();
 		if (userDao.findByEmail(user.getEmail()) != null) {
-			response.setStatusCode(HttpStatus.CONFLICT.value());
-			response.setMessage("user already exists");
-			response.setData(null);
-			return new ResponseEntity<ResponseStructure<User>>(response, HttpStatus.CONFLICT);
+			throw new DuplicateEmailException("User with email " + user.getEmail() + " already exists");
 		}
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		response.setStatusCode(HttpStatus.CREATED.value());
@@ -59,10 +58,7 @@ public class UserService {
 		User user = userDao.getUserById((long) request.getUserId());
 
 		if (user == null) {
-			response.setStatusCode(HttpStatus.NOT_FOUND.value());
-			response.setMessage("User not found");
-			response.setData(null);
-			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		    throw new UserNotFoundException("User not found with id: " + request.getUserId());
 		}
 
 		// Check old password matches

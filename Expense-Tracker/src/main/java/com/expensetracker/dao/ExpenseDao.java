@@ -5,6 +5,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import com.expensetracker.entity.Expense;
@@ -67,5 +71,12 @@ public class ExpenseDao {
 	// Category wise expenses
 	public List<Expense> getExpenseByCategory(Long userId, String category) {
 		return expenseRepository.getExpenseByCategory(userId, category);
+	}
+
+	public Page<Expense> getAllExpenseByUserPaginated(Long userId, int page, int size, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+		Pageable pageable = PageRequest.of(page, size, sort);
+		return expenseRepository.findByUserId(userId, pageable);
 	}
 }

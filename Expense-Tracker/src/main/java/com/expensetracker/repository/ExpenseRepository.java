@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,8 @@ import com.expensetracker.entity.Expense;
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
 	List<Expense> findByUserId(Long userId);
+
+	Page<Expense> findByUserId(Long userId, Pageable pageable);
 
 	// Total expense by user
 	@Query("SELECT SUM(e.amount) FROM Expense e WHERE e.user.id = :userId")
