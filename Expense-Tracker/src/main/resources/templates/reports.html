@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Reports | ExpenseTracker</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap"
+		rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<style>
+		:root {
+			--bg: #0d1117;
+			--card: #161b22;
+			--border: #30363d;
+			--accent: #00e5a0;
+			--accent-dim: rgba(0, 229, 160, 0.12);
+			--text: #e6edf3;
+			--muted: #8b949e;
+			--danger: #f85149;
+			--warning: #e3b341;
+			--info: #388bfd;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg);
+			font-family: 'Nunito', sans-serif;
+			color: var(--text);
+		}
+
+		.sidebar {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 240px;
+			height: 100vh;
+			background: var(--card);
+			border-right: 1px solid var(--border);
+			display: flex;
+			flex-direction: column;
+			padding: 1.5rem 1rem;
+			z-index: 100;
+		}
+
+		.sidebar-brand {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0 0.5rem 1.5rem;
+			border-bottom: 1px solid var(--border);
+			margin-bottom: 1.5rem;
+		}
+
+		.sidebar-brand-icon {
+			width: 36px;
+			height: 36px;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			border-radius: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--accent);
+			font-size: 1rem;
+		}
+
+		.sidebar-brand span {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.95rem;
+		}
+
+		.nav-item {
+			list-style: none;
+			margin-bottom: 4px;
+		}
+
+		.nav-link {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			color: var(--muted);
+			text-decoration: none;
+			font-size: 0.88rem;
+			font-weight: 600;
+			transition: all 0.2s;
+		}
+
+		.nav-link:hover {
+			background: var(--accent-dim);
+			color: var(--text);
+		}
+
+		.nav-link.active {
+			background: var(--accent-dim);
+			color: var(--accent);
+			border: 1px solid rgba(0, 229, 160, 0.2);
+		}
+
+		.nav-link i {
+			font-size: 1rem;
+			width: 18px;
+			text-align: center;
+		}
+
+		.sidebar-footer {
+			margin-top: auto;
+			border-top: 1px solid var(--border);
+			padding-top: 1rem;
+		}
+
+		.user-pill {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			background: var(--bg);
+			border: 1px solid var(--border);
+		}
+
+		.user-avatar {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--accent);
+			font-size: 0.85rem;
+			font-weight: 700;
+		}
+
+		.user-info {
+			flex: 1;
+			overflow: hidden;
+		}
+
+		.user-name {
+			font-size: 0.8rem;
+			font-weight: 700;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.user-role {
+			font-size: 0.7rem;
+			color: var(--muted);
+		}
+
+		.btn-logout {
+			background: transparent;
+			border: 1px solid var(--border);
+			color: var(--muted);
+			border-radius: 8px;
+			padding: 5px 14px;
+			font-size: 0.8rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.btn-logout:hover {
+			border-color: var(--danger);
+			color: var(--danger);
+		}
+
+		.main {
+			margin-left: 240px;
+			padding: 2rem;
+			min-height: 100vh;
+		}
+
+		.page-title {
+			font-family: 'Sora', sans-serif;
+			font-size: 1.4rem;
+			font-weight: 800;
+			margin-bottom: 0.25rem;
+		}
+
+		.page-subtitle {
+			font-size: 0.85rem;
+			color: var(--muted);
+			margin-bottom: 2rem;
+		}
+
+		/* Report tabs */
+		.report-tabs {
+			display: flex;
+			gap: 8px;
+			margin-bottom: 2rem;
+			flex-wrap: wrap;
+		}
+
+		.tab-btn {
+			background: var(--card);
+			border: 1.5px solid var(--border);
+			border-radius: 10px;
+			padding: 0.55rem 1.2rem;
+			font-family: 'Sora', sans-serif;
+			font-size: 0.82rem;
+			font-weight: 700;
+			color: var(--muted);
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.tab-btn:hover {
+			border-color: var(--accent);
+			color: var(--text);
+		}
+
+		.tab-btn.active {
+			background: var(--accent-dim);
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		/* Report card */
+		.report-card {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			padding: 1.75rem;
+		}
+
+		.report-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 1.5rem;
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+
+		.report-title {
+			font-family: 'Sora', sans-serif;
+			font-size: 1rem;
+			font-weight: 700;
+		}
+
+		.report-total {
+			font-family: 'Sora', sans-serif;
+			font-size: 1.8rem;
+			font-weight: 800;
+			color: var(--accent);
+		}
+
+		.report-total-label {
+			font-size: 0.75rem;
+			color: var(--muted);
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.controls {
+			display: flex;
+			gap: 10px;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+
+		.controls select,
+		.controls input {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			color: var(--text);
+			border-radius: 10px;
+			padding: 0.5rem 0.9rem;
+			font-family: 'Nunito', sans-serif;
+			font-size: 0.85rem;
+			outline: none;
+			transition: border-color 0.2s;
+		}
+
+		.controls select:focus,
+		.controls input:focus {
+			border-color: var(--accent);
+		}
+
+		.controls select option {
+			background: var(--card);
+		}
+
+		.btn-fetch {
+			background: var(--accent);
+			border: none;
+			color: #0d1117;
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.82rem;
+			padding: 0.5rem 1.2rem;
+			border-radius: 10px;
+			cursor: pointer;
+			transition: opacity 0.2s;
+		}
+
+		.btn-fetch:hover {
+			opacity: 0.9;
+		}
+
+		/* Expense list in report */
+		.report-list {
+			margin-top: 1.25rem;
+		}
+
+		.report-item {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.75rem 1rem;
+			border-radius: 10px;
+			border: 1px solid var(--border);
+			margin-bottom: 8px;
+			background: var(--bg);
+			transition: border-color 0.2s;
+		}
+
+		.report-item:hover {
+			border-color: rgba(0, 229, 160, 0.3);
+		}
+
+		.report-item-left {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.report-item-icon {
+			width: 36px;
+			height: 36px;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 1rem;
+		}
+
+		.report-item-title {
+			font-size: 0.875rem;
+			font-weight: 700;
+		}
+
+		.report-item-meta {
+			font-size: 0.75rem;
+			color: var(--muted);
+			margin-top: 2px;
+		}
+
+		.report-item-amount {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			color: var(--accent);
+		}
+
+		/* Category breakdown */
+		.cat-breakdown {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+			gap: 10px;
+			margin-top: 1.25rem;
+		}
+
+		.cat-item {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1rem;
+			text-align: center;
+		}
+
+		.cat-item-icon {
+			font-size: 1.5rem;
+			margin-bottom: 6px;
+		}
+
+		.cat-item-name {
+			font-size: 0.72rem;
+			font-weight: 700;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.cat-item-amount {
+			font-family: 'Sora', sans-serif;
+			font-size: 1rem;
+			font-weight: 800;
+			color: var(--accent);
+			margin-top: 4px;
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 2.5rem;
+			color: var(--muted);
+			font-size: 0.9rem;
+		}
+
+		.empty-state i {
+			font-size: 2rem;
+			display: block;
+			margin-bottom: 0.75rem;
+			opacity: 0.4;
+		}
+
+		.badge-category {
+			font-size: 0.7rem;
+			font-weight: 700;
+			padding: 2px 7px;
+			border-radius: 20px;
+			text-transform: uppercase;
+		}
+
+		.badge-FOOD {
+			background: rgba(0, 229, 160, 0.15);
+			color: var(--accent);
+		}
+
+		.badge-TRAVEL {
+			background: rgba(56, 139, 253, 0.15);
+			color: var(--info);
+		}
+
+		.badge-SHOPPING {
+			background: rgba(227, 179, 65, 0.15);
+			color: var(--warning);
+		}
+
+		.badge-BILLS {
+			background: rgba(248, 81, 73, 0.15);
+			color: var(--danger);
+		}
+
+		.badge-ENTERTAINMENT {
+			background: rgba(188, 140, 255, 0.15);
+			color: #bc8cff;
+		}
+
+		.badge-HEALTH {
+			background: rgba(63, 185, 80, 0.15);
+			color: #3fb950;
+		}
+
+		.badge-EDUCATION {
+			background: rgba(0, 229, 160, 0.15);
+			color: var(--accent);
+		}
+
+		.badge-OTHER {
+			background: rgba(139, 148, 158, 0.15);
+			color: var(--muted);
+		}
+	</style>
+</head>
+
+<body>
+	<div class="sidebar">
+		<div class="sidebar-brand">
+			<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+			<span>ExpenseTracker</span>
+		</div>
+		<ul class="nav flex-column" style="gap:2px;">
+			<li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a></li>
+			<li class="nav-item"><a href="add-expense.html" class="nav-link"><i class="bi bi-plus-circle"></i> Add
+					Expense</a></li>
+			<li class="nav-item"><a href="view-expense.html" class="nav-link"><i class="bi bi-list-ul"></i> View
+					Expenses</a></li>
+			<li class="nav-item"><a href="reports.html" class="nav-link active"><i class="bi bi-bar-chart"></i>
+					Reports</a></li>
+			<li class="nav-item"><a href="change-password.html" class="nav-link"><i class="bi bi-shield-lock"></i>
+					Change Password</a></li>
+		</ul>
+		<div class="sidebar-footer">
+			<div class="user-pill">
+				<div class="user-avatar" id="userAvatar">D</div>
+				<div class="user-info">
+					<div class="user-name" id="userName">Loading...</div>
+					<div class="user-role" id="userRole">User</div>
+				</div>
+				<button class="btn-logout" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
+			</div>
+		</div>
+	</div>
+
+	<div class="main">
+		<div class="page-title">Reports</div>
+		<div class="page-subtitle">Analyze your spending patterns</div>
+
+		<div class="report-tabs">
+			<button class="tab-btn active" onclick="switchTab('weekly', this)"><i
+					class="bi bi-calendar-week me-1"></i>Weekly</button>
+			<button class="tab-btn" onclick="switchTab('monthly', this)"><i
+					class="bi bi-calendar-month me-1"></i>Monthly</button>
+			<button class="tab-btn" onclick="switchTab('yearly', this)"><i
+					class="bi bi-calendar me-1"></i>Yearly</button>
+			<button class="tab-btn" onclick="switchTab('category', this)"><i class="bi bi-tag me-1"></i>By
+				Category</button>
+		</div>
+
+		<div class="report-card">
+			<!-- Weekly -->
+			<div id="weeklySection">
+				<div class="report-header">
+					<div>
+						<div class="report-title">Weekly Report</div>
+						<div class="report-total-label">Last 7 days</div>
+						<div class="report-total" id="weeklyTotal">₹0</div>
+					</div>
+				</div>
+				<div class="report-list" id="weeklyList">
+					<div class="empty-state"><i class="bi bi-clock-history"></i>Loading...</div>
+				</div>
+			</div>
+
+			<!-- Monthly -->
+			<div id="monthlySection" style="display:none;">
+				<div class="report-header">
+					<div>
+						<div class="report-title">Monthly Report</div>
+						<div class="report-total-label">Total for selected month</div>
+						<div class="report-total" id="monthlyTotal">₹0</div>
+					</div>
+					<div class="controls">
+						<select id="monthSelect">
+							<option value="1">January</option>
+							<option value="2">February</option>
+							<option value="3">March</option>
+							<option value="4">April</option>
+							<option value="5">May</option>
+							<option value="6">June</option>
+							<option value="7">July</option>
+							<option value="8">August</option>
+							<option value="9">September</option>
+							<option value="10">October</option>
+							<option value="11">November</option>
+							<option value="12">December</option>
+						</select>
+						<select id="monthYearSelect"></select>
+						<button class="btn-fetch" onclick="loadMonthly()">Fetch</button>
+					</div>
+				</div>
+				<div class="report-list" id="monthlyList"></div>
+			</div>
+
+			<!-- Yearly -->
+			<div id="yearlySection" style="display:none;">
+				<div class="report-header">
+					<div>
+						<div class="report-title">Yearly Report</div>
+						<div class="report-total-label">Total for selected year</div>
+						<div class="report-total" id="yearlyTotal">₹0</div>
+					</div>
+					<div class="controls">
+						<select id="yearSelect"></select>
+						<button class="btn-fetch" onclick="loadYearly()">Fetch</button>
+					</div>
+				</div>
+				<div class="report-list" id="yearlyList"></div>
+			</div>
+
+			<!-- Category -->
+			<div id="categorySection" style="display:none;">
+				<div class="report-header">
+					<div>
+						<div class="report-title">Category Breakdown</div>
+						<div class="report-total-label">Spending by category</div>
+					</div>
+					<div class="controls">
+						<select id="catSelect">
+							<option>FOOD</option>
+							<option>TRAVEL</option>
+							<option>SHOPPING</option>
+							<option>BILLS</option>
+							<option>ENTERTAINMENT</option>
+							<option>HEALTH</option>
+							<option>EDUCATION</option>
+							<option>OTHER</option>
+						</select>
+						<button class="btn-fetch" onclick="loadCategory()">Fetch</button>
+					</div>
+				</div>
+				<div class="report-total" id="categoryTotal" style="margin-bottom:1rem;">₹0</div>
+				<div class="report-list" id="categoryList"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const BASE_URL = 'http://localhost:8080';
+		const user = JSON.parse(sessionStorage.getItem('user'));
+		if (!user) window.location.href = 'login.html';
+
+		document.getElementById('userName').textContent = user.fullName;
+		document.getElementById('userRole').textContent = user.role || 'USER';
+		document.getElementById('userAvatar').textContent = user.fullName.charAt(0).toUpperCase();
+
+		const now = new Date();
+		const currentYear = now.getFullYear();
+		const currentMonth = now.getMonth() + 1;
+
+		// Populate year dropdowns
+		[document.getElementById('monthYearSelect'), document.getElementById('yearSelect')].forEach(sel => {
+			if (!sel) return;
+			for (let y = currentYear; y >= currentYear - 3; y--) {
+				const opt = document.createElement('option');
+				opt.value = y; opt.textContent = y; sel.appendChild(opt);
+			}
+		});
+		if (document.getElementById('monthSelect')) document.getElementById('monthSelect').value = currentMonth;
+
+		function formatCurrency(a) {return '₹' + parseFloat(a || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});}
+
+		function getCatIcon(cat) {
+			const icons = {FOOD: '🍽️', TRAVEL: '✈️', SHOPPING: '🛍️', BILLS: '📄', ENTERTAINMENT: '🎮', HEALTH: '💊', EDUCATION: '📚', OTHER: '📦'};
+			return icons[cat] || '📦';
+		}
+
+		function renderExpenses(expenses, containerId) {
+			const container = document.getElementById(containerId);
+			if (!expenses || expenses.length === 0) {
+				container.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>No expenses found</div>`;
+				return;
+			}
+			container.innerHTML = expenses.map(e => `
+        <div class="report-item">
+          <div class="report-item-left">
+            <div class="report-item-icon" style="background:var(--accent-dim);">${getCatIcon(e.category)}</div>
+            <div>
+              <div class="report-item-title">${e.title}</div>
+              <div class="report-item-meta">${e.date} &bull; <span class="badge-category badge-${e.category}">${e.category}</span> &bull; ${e.paymentMethod || '-'}</div>
+            </div>
+          </div>
+          <div class="report-item-amount">${formatCurrency(e.amount)}</div>
+        </div>
+      `).join('');
+		}
+
+		function calcTotal(expenses) {
+			return expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+		}
+
+		async function loadWeekly() {
+			try {
+				const res = await fetch(`${BASE_URL}/report/weekly/${user.id}`);
+				const data = await res.json();
+				const expenses = data.data || [];
+				document.getElementById('weeklyTotal').textContent = formatCurrency(calcTotal(expenses));
+				renderExpenses(expenses, 'weeklyList');
+			} catch (e) {console.error(e);}
+		}
+
+		async function loadMonthly() {
+			const month = document.getElementById('monthSelect').value;
+			const year = document.getElementById('monthYearSelect').value;
+			try {
+				const res = await fetch(`${BASE_URL}/report/monthly/${user.id}/${month}/${year}`);
+				const data = await res.json();
+				const expenses = data.data || [];
+				document.getElementById('monthlyTotal').textContent = formatCurrency(calcTotal(expenses));
+				renderExpenses(expenses, 'monthlyList');
+			} catch (e) {console.error(e);}
+		}
+
+		async function loadYearly() {
+			const year = document.getElementById('yearSelect').value;
+			try {
+				const res = await fetch(`${BASE_URL}/report/yearly/${user.id}/${year}`);
+				const data = await res.json();
+				const expenses = data.data || [];
+				document.getElementById('yearlyTotal').textContent = formatCurrency(calcTotal(expenses));
+				renderExpenses(expenses, 'yearlyList');
+			} catch (e) {console.error(e);}
+		}
+
+		async function loadCategory() {
+			const cat = document.getElementById('catSelect').value;
+			try {
+				const res = await fetch(`${BASE_URL}/report/category/${user.id}/${cat}`);
+				const data = await res.json();
+				const expenses = data.data || [];
+				document.getElementById('categoryTotal').textContent = formatCurrency(calcTotal(expenses));
+				renderExpenses(expenses, 'categoryList');
+			} catch (e) {console.error(e);}
+		}
+
+		function switchTab(tab, el) {
+			document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+			el.classList.add('active');
+			['weekly', 'monthly', 'yearly', 'category'].forEach(t => {
+				document.getElementById(t + 'Section').style.display = t === tab ? 'block' : 'none';
+			});
+			if (tab === 'monthly') loadMonthly();
+			if (tab === 'yearly') loadYearly();
+			if (tab === 'category') loadCategory();
+		}
+
+		function logout() {sessionStorage.clear(); window.location.href = 'login.html';}
+		loadWeekly();
+	</script>
+</body>
+
+</html>

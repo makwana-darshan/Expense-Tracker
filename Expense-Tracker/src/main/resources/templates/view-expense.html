@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>View Expenses | ExpenseTracker</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap"
+		rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<style>
+		:root {
+			--bg: #0d1117;
+			--card: #161b22;
+			--border: #30363d;
+			--accent: #00e5a0;
+			--accent-dim: rgba(0, 229, 160, 0.12);
+			--text: #e6edf3;
+			--muted: #8b949e;
+			--danger: #f85149;
+			--warning: #e3b341;
+			--info: #388bfd;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg);
+			font-family: 'Nunito', sans-serif;
+			color: var(--text);
+		}
+
+		.sidebar {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 240px;
+			height: 100vh;
+			background: var(--card);
+			border-right: 1px solid var(--border);
+			display: flex;
+			flex-direction: column;
+			padding: 1.5rem 1rem;
+			z-index: 100;
+		}
+
+		.sidebar-brand {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0 0.5rem 1.5rem;
+			border-bottom: 1px solid var(--border);
+			margin-bottom: 1.5rem;
+		}
+
+		.sidebar-brand-icon {
+			width: 36px;
+			height: 36px;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			border-radius: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--accent);
+			font-size: 1rem;
+		}
+
+		.sidebar-brand span {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.95rem;
+		}
+
+		.nav-item {
+			list-style: none;
+			margin-bottom: 4px;
+		}
+
+		.nav-link {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			color: var(--muted);
+			text-decoration: none;
+			font-size: 0.88rem;
+			font-weight: 600;
+			transition: all 0.2s;
+		}
+
+		.nav-link:hover {
+			background: var(--accent-dim);
+			color: var(--text);
+		}
+
+		.nav-link.active {
+			background: var(--accent-dim);
+			color: var(--accent);
+			border: 1px solid rgba(0, 229, 160, 0.2);
+		}
+
+		.nav-link i {
+			font-size: 1rem;
+			width: 18px;
+			text-align: center;
+		}
+
+		.sidebar-footer {
+			margin-top: auto;
+			border-top: 1px solid var(--border);
+			padding-top: 1rem;
+		}
+
+		.user-pill {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			background: var(--bg);
+			border: 1px solid var(--border);
+		}
+
+		.user-avatar {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--accent);
+			font-size: 0.85rem;
+			font-weight: 700;
+		}
+
+		.user-info {
+			flex: 1;
+			overflow: hidden;
+		}
+
+		.user-name {
+			font-size: 0.8rem;
+			font-weight: 700;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.user-role {
+			font-size: 0.7rem;
+			color: var(--muted);
+		}
+
+		.btn-logout {
+			background: transparent;
+			border: 1px solid var(--border);
+			color: var(--muted);
+			border-radius: 8px;
+			padding: 5px 14px;
+			font-size: 0.8rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.btn-logout:hover {
+			border-color: var(--danger);
+			color: var(--danger);
+		}
+
+		.main {
+			margin-left: 240px;
+			padding: 2rem;
+			min-height: 100vh;
+		}
+
+		.page-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 2rem;
+		}
+
+		.page-title {
+			font-family: 'Sora', sans-serif;
+			font-size: 1.4rem;
+			font-weight: 800;
+		}
+
+		.page-subtitle {
+			font-size: 0.85rem;
+			color: var(--muted);
+			margin-top: 2px;
+		}
+
+		.filter-bar {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 1.5rem;
+			flex-wrap: wrap;
+		}
+
+		.filter-bar input,
+		.filter-bar select {
+			background: var(--card);
+			border: 1px solid var(--border);
+			color: var(--text);
+			border-radius: 10px;
+			padding: 0.5rem 0.9rem;
+			font-family: 'Nunito', sans-serif;
+			font-size: 0.85rem;
+			outline: none;
+			transition: border-color 0.2s;
+		}
+
+		.filter-bar input:focus,
+		.filter-bar select:focus {
+			border-color: var(--accent);
+		}
+
+		.filter-bar select option {
+			background: var(--card);
+		}
+
+		.filter-bar input {
+			flex: 1;
+			min-width: 180px;
+		}
+
+		.expenses-table {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			overflow: hidden;
+		}
+
+		.expenses-table table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		.expenses-table th {
+			background: var(--bg);
+			font-size: 0.75rem;
+			font-weight: 700;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			padding: 0.85rem 1.25rem;
+			border-bottom: 1px solid var(--border);
+		}
+
+		.expenses-table td {
+			padding: 0.85rem 1.25rem;
+			font-size: 0.875rem;
+			border-bottom: 1px solid var(--border);
+			vertical-align: middle;
+		}
+
+		.expenses-table tr:last-child td {
+			border-bottom: none;
+		}
+
+		.expenses-table tr:hover td {
+			background: rgba(255, 255, 255, 0.02);
+		}
+
+		.badge-category {
+			font-size: 0.7rem;
+			font-weight: 700;
+			padding: 3px 8px;
+			border-radius: 20px;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+		}
+
+		.badge-FOOD {
+			background: rgba(0, 229, 160, 0.15);
+			color: var(--accent);
+		}
+
+		.badge-TRAVEL {
+			background: rgba(56, 139, 253, 0.15);
+			color: var(--info);
+		}
+
+		.badge-SHOPPING {
+			background: rgba(227, 179, 65, 0.15);
+			color: var(--warning);
+		}
+
+		.badge-BILLS {
+			background: rgba(248, 81, 73, 0.15);
+			color: var(--danger);
+		}
+
+		.badge-ENTERTAINMENT {
+			background: rgba(188, 140, 255, 0.15);
+			color: #bc8cff;
+		}
+
+		.badge-HEALTH {
+			background: rgba(63, 185, 80, 0.15);
+			color: #3fb950;
+		}
+
+		.badge-EDUCATION {
+			background: rgba(0, 229, 160, 0.15);
+			color: var(--accent);
+		}
+
+		.badge-OTHER {
+			background: rgba(139, 148, 158, 0.15);
+			color: var(--muted);
+		}
+
+		.btn-icon {
+			background: transparent;
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			width: 30px;
+			height: 30px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			transition: all 0.2s;
+			font-size: 0.8rem;
+		}
+
+		.btn-edit {
+			color: var(--info);
+		}
+
+		.btn-edit:hover {
+			border-color: var(--info);
+			background: rgba(56, 139, 253, 0.1);
+		}
+
+		.btn-delete {
+			color: var(--danger);
+		}
+
+		.btn-delete:hover {
+			border-color: var(--danger);
+			background: rgba(248, 81, 73, 0.1);
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 3rem;
+			color: var(--muted);
+			font-size: 0.9rem;
+		}
+
+		.empty-state i {
+			font-size: 2.5rem;
+			display: block;
+			margin-bottom: 0.75rem;
+			opacity: 0.4;
+		}
+
+		.amount-text {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			color: var(--accent);
+		}
+
+		/* Modal */
+		.modal-content {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+		}
+
+		.modal-header {
+			border-bottom: 1px solid var(--border);
+			padding: 1.25rem 1.5rem;
+		}
+
+		.modal-title {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+		}
+
+		.modal-footer {
+			border-top: 1px solid var(--border);
+			padding: 1rem 1.5rem;
+		}
+
+		.btn-close-custom {
+			background: transparent;
+			border: none;
+			color: var(--muted);
+			font-size: 1.1rem;
+			cursor: pointer;
+		}
+
+		.form-label {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 6px;
+		}
+
+		.form-control,
+		.form-select {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			color: var(--text);
+			border-radius: 10px;
+			padding: 0.6rem 1rem;
+			font-family: 'Nunito', sans-serif;
+			font-size: 0.875rem;
+		}
+
+		.form-control:focus,
+		.form-select:focus {
+			background: var(--bg);
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px rgba(0, 229, 160, 0.15);
+			color: var(--text);
+		}
+
+		.form-select option {
+			background: var(--card);
+		}
+
+		.btn-accent {
+			background: var(--accent);
+			border: none;
+			color: #0d1117;
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.875rem;
+			padding: 0.6rem 1.5rem;
+			border-radius: 10px;
+		}
+
+		.btn-accent:hover {
+			opacity: 0.9;
+			color: #0d1117;
+		}
+
+		.btn-cancel {
+			background: transparent;
+			border: 1px solid var(--border);
+			color: var(--muted);
+			border-radius: 10px;
+			padding: 0.6rem 1.5rem;
+			font-family: 'Nunito', sans-serif;
+			font-weight: 600;
+			font-size: 0.875rem;
+		}
+
+		.btn-cancel:hover {
+			color: var(--text);
+		}
+
+		.spinner-border-sm {
+			width: 1rem;
+			height: 1rem;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="sidebar">
+		<div class="sidebar-brand">
+			<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+			<span>ExpenseTracker</span>
+		</div>
+		<ul class="nav flex-column" style="gap:2px;">
+			<li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a></li>
+			<li class="nav-item"><a href="add-expense.html" class="nav-link"><i class="bi bi-plus-circle"></i> Add
+					Expense</a></li>
+			<li class="nav-item"><a href="view-expense.html" class="nav-link active"><i class="bi bi-list-ul"></i> View
+					Expenses</a></li>
+			<li class="nav-item"><a href="reports.html" class="nav-link"><i class="bi bi-bar-chart"></i> Reports</a>
+			</li>
+			<li class="nav-item"><a href="change-password.html" class="nav-link"><i class="bi bi-shield-lock"></i>
+					Change Password</a></li>
+		</ul>
+		<div class="sidebar-footer">
+			<div class="user-pill">
+				<div class="user-avatar" id="userAvatar">D</div>
+				<div class="user-info">
+					<div class="user-name" id="userName">Loading...</div>
+					<div class="user-role" id="userRole">User</div>
+				</div>
+				<button class="btn-logout" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
+			</div>
+		</div>
+	</div>
+
+	<div class="main">
+		<div class="page-header">
+			<div>
+				<div class="page-title">My Expenses</div>
+				<div class="page-subtitle" id="expenseCount">Loading...</div>
+			</div>
+			<a href="add-expense.html" class="btn"
+				style="background:var(--accent);color:#0d1117;font-family:'Sora',sans-serif;font-weight:700;font-size:0.85rem;border-radius:10px;padding:0.55rem 1.1rem;">
+				<i class="bi bi-plus me-1"></i> Add Expense
+			</a>
+		</div>
+
+		<div class="filter-bar">
+			<input type="text" id="searchInput" placeholder="🔍 Search by title..." oninput="filterExpenses()" />
+			<select id="categoryFilter" onchange="filterExpenses()">
+				<option value="">All Categories</option>
+				<option>FOOD</option>
+				<option>TRAVEL</option>
+				<option>SHOPPING</option>
+				<option>BILLS</option>
+				<option>ENTERTAINMENT</option>
+				<option>HEALTH</option>
+				<option>EDUCATION</option>
+				<option>OTHER</option>
+			</select>
+			<select id="paymentFilter" onchange="filterExpenses()">
+				<option value="">All Payments</option>
+				<option>CASH</option>
+				<option>UPI</option>
+				<option>CARD</option>
+				<option>NET_BANKING</option>
+				<option>WALLET</option>
+			</select>
+		</div>
+
+		<div class="expenses-table">
+			<table>
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Title</th>
+						<th>Category</th>
+						<th>Date</th>
+						<th>Payment</th>
+						<th style="text-align:right;">Amount</th>
+						<th style="text-align:center;">Actions</th>
+					</tr>
+				</thead>
+				<tbody id="expenseBody">
+					<tr>
+						<td colspan="7">
+							<div class="empty-state"><i class="bi bi-inbox"></i>Loading...</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Edit Modal -->
+	<div class="modal fade" id="editModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<span class="modal-title">Edit Expense</span>
+					<button class="btn-close-custom" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i></button>
+				</div>
+				<div class="modal-body p-4">
+					<form id="editForm">
+						<input type="hidden" id="editId" />
+						<div class="row g-3">
+							<div class="col-12"><label class="form-label">Title</label><input type="text"
+									class="form-control" id="editTitle" required /></div>
+							<div class="col-md-6"><label class="form-label">Amount (₹)</label><input type="number"
+									class="form-control" id="editAmount" step="0.01" required /></div>
+							<div class="col-md-6"><label class="form-label">Date</label><input type="date"
+									class="form-control" id="editDate" required /></div>
+							<div class="col-12"><label class="form-label">Description</label><input type="text"
+									class="form-control" id="editDescription" /></div>
+							<div class="col-md-6">
+								<label class="form-label">Category</label>
+								<select class="form-select" id="editCategory">
+									<option>FOOD</option>
+									<option>TRAVEL</option>
+									<option>SHOPPING</option>
+									<option>BILLS</option>
+									<option>ENTERTAINMENT</option>
+									<option>HEALTH</option>
+									<option>EDUCATION</option>
+									<option>OTHER</option>
+								</select>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">Payment Method</label>
+								<select class="form-select" id="editPayment">
+									<option>CASH</option>
+									<option>UPI</option>
+									<option>CARD</option>
+									<option>NET_BANKING</option>
+									<option>WALLET</option>
+								</select>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+					<button class="btn-accent" onclick="updateExpense()" id="updateBtn">
+						<span id="updateBtnText">Update</span>
+						<span id="updateSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		const BASE_URL = 'http://localhost:8080';
+		const user = JSON.parse(sessionStorage.getItem('user'));
+		if (!user) window.location.href = 'login.html';
+
+		document.getElementById('userName').textContent = user.fullName;
+		document.getElementById('userRole').textContent = user.role || 'USER';
+		document.getElementById('userAvatar').textContent = user.fullName.charAt(0).toUpperCase();
+
+		let allExpenses = [];
+
+		function formatCurrency(a) {return '₹' + parseFloat(a || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});}
+		function getBadge(c) {return `<span class="badge-category badge-${c}">${c}</span>`;}
+
+		async function loadExpenses() {
+			try {
+				const res = await fetch(`${BASE_URL}/expense/getAll/${user.id}`);
+				const data = await res.json();
+				allExpenses = (data.data || []).reverse();
+				document.getElementById('expenseCount').textContent = `${allExpenses.length} expense(s) recorded`;
+				renderTable(allExpenses);
+			} catch (e) {console.error(e);}
+		}
+
+		function renderTable(expenses) {
+			const tbody = document.getElementById('expenseBody');
+			if (expenses.length === 0) {
+				tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="bi bi-inbox"></i>No expenses found</div></td></tr>`;
+				return;
+			}
+			tbody.innerHTML = expenses.map((e, i) => `
+        <tr>
+          <td style="color:var(--muted);font-size:0.8rem;">${i + 1}</td>
+          <td>
+            <strong>${e.title}</strong>
+            ${e.description ? `<br><small style="color:var(--muted);">${e.description}</small>` : ''}
+          </td>
+          <td>${getBadge(e.category)}</td>
+          <td style="color:var(--muted);font-size:0.8rem;">${e.date}</td>
+          <td style="color:var(--muted);font-size:0.8rem;">${e.paymentMethod || '-'}</td>
+          <td style="text-align:right;"><span class="amount-text">${formatCurrency(e.amount)}</span></td>
+          <td style="text-align:center;">
+            <button class="btn-icon btn-edit me-1" onclick="openEdit(${JSON.stringify(e).replace(/"/g, '&quot;')})"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon btn-delete" onclick="deleteExpense(${e.id})"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+		}
+
+		function filterExpenses() {
+			const search = document.getElementById('searchInput').value.toLowerCase();
+			const cat = document.getElementById('categoryFilter').value;
+			const pay = document.getElementById('paymentFilter').value;
+			const filtered = allExpenses.filter(e =>
+				(!search || e.title.toLowerCase().includes(search)) &&
+				(!cat || e.category === cat) &&
+				(!pay || e.paymentMethod === pay)
+			);
+			renderTable(filtered);
+		}
+
+		function openEdit(expense) {
+			document.getElementById('editId').value = expense.id;
+			document.getElementById('editTitle').value = expense.title;
+			document.getElementById('editAmount').value = expense.amount;
+			document.getElementById('editDate').value = expense.date;
+			document.getElementById('editDescription').value = expense.description || '';
+			document.getElementById('editCategory').value = expense.category;
+			document.getElementById('editPayment').value = expense.paymentMethod || 'CASH';
+			new bootstrap.Modal(document.getElementById('editModal')).show();
+		}
+
+		async function updateExpense() {
+			const id = document.getElementById('editId').value;
+			const btn = document.getElementById('updateBtn');
+			const btnText = document.getElementById('updateBtnText');
+			const spinner = document.getElementById('updateSpinner');
+			btn.disabled = true; btnText.textContent = 'Saving...'; spinner.classList.remove('d-none');
+
+			const payload = {
+				title: document.getElementById('editTitle').value,
+				amount: parseFloat(document.getElementById('editAmount').value),
+				date: document.getElementById('editDate').value,
+				description: document.getElementById('editDescription').value,
+				category: document.getElementById('editCategory').value,
+				paymentMethod: document.getElementById('editPayment').value,
+				time: '00:00:00'
+			};
+
+			try {
+				const res = await fetch(`${BASE_URL}/expense/update/${id}`, {
+					method: 'PUT',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(payload)
+				});
+				const data = await res.json();
+				if (res.ok) {
+					bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+					loadExpenses();
+				} else {
+					alert(data.message || 'Update failed');
+				}
+			} catch (e) {alert('Server error');}
+			finally {
+				btn.disabled = false; btnText.textContent = 'Update'; spinner.classList.add('d-none');
+			}
+		}
+
+		async function deleteExpense(id) {
+			if (!confirm('Delete this expense?')) return;
+			try {
+				const res = await fetch(`${BASE_URL}/expense/delete/${id}`, {method: 'DELETE'});
+				if (res.ok) loadExpenses();
+				else alert('Delete failed');
+			} catch (e) {alert('Server error');}
+		}
+
+		function logout() {sessionStorage.clear(); window.location.href = 'login.html';}
+		loadExpenses();
+	</script>
+</body>
+
+</html>

@@ -19,6 +19,12 @@ public class UserDao {
 		return userRepository.save(user);
 	}
 
+	public User login(String email, String password) {
+	    return userRepository.findByEmailAndPassword(email, password)
+	            .orElse(null);
+	}
+	
+	
 	// ✅ Get All Users
 	public List<User> getAllUsers() {
 		return userRepository.findAll();

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Register | ExpenseTracker</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap"
+		rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<style>
+		:root {
+			--bg: #0d1117;
+			--card: #161b22;
+			--border: #30363d;
+			--accent: #00e5a0;
+			--accent-dim: rgba(0, 229, 160, 0.12);
+			--text: #e6edf3;
+			--muted: #8b949e;
+			--danger: #f85149;
+			--success: #3fb950;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg);
+			font-family: 'Nunito', sans-serif;
+			color: var(--text);
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 2rem 1rem;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+			background: radial-gradient(ellipse at 80% 50%, rgba(0, 229, 160, 0.06) 0%, transparent 50%),
+				radial-gradient(ellipse at 20% 80%, rgba(0, 120, 212, 0.06) 0%, transparent 50%);
+			animation: bgShift 8s ease-in-out infinite alternate;
+			z-index: 0;
+		}
+
+		@keyframes bgShift {
+			0% {
+				transform: translate(0, 0);
+			}
+
+			100% {
+				transform: translate(-30px, 20px);
+			}
+		}
+
+		.auth-wrapper {
+			position: relative;
+			z-index: 1;
+			width: 100%;
+			max-width: 440px;
+			animation: fadeUp 0.6s ease forwards;
+		}
+
+		@keyframes fadeUp {
+			from {
+				opacity: 0;
+				transform: translateY(24px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		.brand {
+			text-align: center;
+			margin-bottom: 2rem;
+		}
+
+		.brand-icon {
+			width: 52px;
+			height: 52px;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			border-radius: 14px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 0 auto 1rem;
+			font-size: 1.4rem;
+			color: var(--accent);
+		}
+
+		.brand h1 {
+			font-family: 'Sora', sans-serif;
+			font-size: 1.5rem;
+			font-weight: 800;
+			letter-spacing: -0.5px;
+		}
+
+		.brand p {
+			font-size: 0.85rem;
+			color: var(--muted);
+			margin-top: 4px;
+		}
+
+		.card {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			padding: 2rem;
+		}
+
+		.form-label {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 6px;
+		}
+
+		.form-control,
+		.form-select {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			color: var(--text);
+			border-radius: 10px;
+			padding: 0.65rem 1rem;
+			font-family: 'Nunito', sans-serif;
+			font-size: 0.9rem;
+			transition: border-color 0.2s, box-shadow 0.2s;
+		}
+
+		.form-control:focus,
+		.form-select:focus {
+			background: var(--bg);
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px rgba(0, 229, 160, 0.15);
+			color: var(--text);
+		}
+
+		.form-control::placeholder {
+			color: var(--muted);
+		}
+
+		.form-select option {
+			background: var(--card);
+		}
+
+		.input-group .form-control {
+			border-right: none;
+			border-radius: 10px 0 0 10px;
+		}
+
+		.input-group-text {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			color: var(--muted);
+			border-radius: 0 10px 10px 0;
+			cursor: pointer;
+			transition: color 0.2s;
+		}
+
+		.input-group-text:hover {
+			color: var(--accent);
+		}
+
+		.btn-accent {
+			background: var(--accent);
+			border: none;
+			color: #0d1117;
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.9rem;
+			padding: 0.7rem;
+			border-radius: 10px;
+			width: 100%;
+			transition: opacity 0.2s, transform 0.15s;
+		}
+
+		.btn-accent:hover {
+			opacity: 0.9;
+			transform: translateY(-1px);
+			color: #0d1117;
+		}
+
+		.btn-accent:disabled {
+			opacity: 0.6;
+		}
+
+		.alert-custom {
+			border-radius: 10px;
+			font-size: 0.85rem;
+			padding: 0.65rem 1rem;
+			display: none;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 1rem;
+		}
+
+		.alert-custom.show {
+			display: flex;
+		}
+
+		.alert-error {
+			background: rgba(248, 81, 73, 0.1);
+			border: 1px solid rgba(248, 81, 73, 0.3);
+			color: var(--danger);
+		}
+
+		.alert-success {
+			background: rgba(63, 185, 80, 0.1);
+			border: 1px solid rgba(63, 185, 80, 0.3);
+			color: var(--success);
+		}
+
+		.footer-text {
+			text-align: center;
+			margin-top: 1.25rem;
+			font-size: 0.85rem;
+			color: var(--muted);
+		}
+
+		.footer-text a {
+			color: var(--accent);
+			text-decoration: none;
+			font-weight: 600;
+		}
+
+		.footer-text a:hover {
+			text-decoration: underline;
+		}
+
+		.spinner-border-sm {
+			width: 1rem;
+			height: 1rem;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="auth-wrapper">
+		<div class="brand">
+			<div class="brand-icon"><i class="bi bi-wallet2"></i></div>
+			<h1>ExpenseTracker</h1>
+			<p>Create your account to get started</p>
+		</div>
+
+		<div class="card">
+			<h5 style="font-family:'Sora',sans-serif; font-weight:700; margin-bottom:1.5rem;">Create Account 🚀</h5>
+
+			<div class="alert-custom alert-error" id="errorAlert">
+				<i class="bi bi-exclamation-circle"></i>
+				<span id="errorMsg"></span>
+			</div>
+			<div class="alert-custom alert-success" id="successAlert">
+				<i class="bi bi-check-circle"></i>
+				<span id="successMsg">Registered successfully! Redirecting...</span>
+			</div>
+
+			<form id="registerForm">
+				<div class="mb-3">
+					<label class="form-label">Full Name</label>
+					<input type="text" class="form-control" id="fullName" placeholder="Darshan Makwana" required />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Email Address</label>
+					<input type="email" class="form-control" id="email" placeholder="darshan@gmail.com" required />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Password</label>
+					<div class="input-group">
+						<input type="password" class="form-control" id="password" placeholder="Min 6 characters"
+							required />
+						<span class="input-group-text" onclick="togglePassword()">
+							<i class="bi bi-eye" id="eyeIcon"></i>
+						</span>
+					</div>
+				</div>
+				<div class="mb-4">
+					<label class="form-label">Role</label>
+					<select class="form-select" id="role">
+						<option value="USER">User</option>
+						<option value="ADMIN">Admin</option>
+					</select>
+				</div>
+				<button type="submit" class="btn-accent" id="registerBtn">
+					<span id="btnText">Create Account</span>
+					<span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+				</button>
+			</form>
+
+			<div class="footer-text" style="margin-top:1.25rem;">
+				Already have an account? <a href="login.html">Login here</a>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const BASE_URL = 'http://localhost:8080';
+
+		function togglePassword() {
+			const pwd = document.getElementById('password');
+			const icon = document.getElementById('eyeIcon');
+			pwd.type = pwd.type === 'password' ? 'text' : 'password';
+			icon.className = pwd.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+		}
+
+		function showError(msg) {
+			document.getElementById('errorMsg').textContent = msg;
+			document.getElementById('errorAlert').classList.add('show');
+			document.getElementById('successAlert').classList.remove('show');
+		}
+
+		function showSuccess() {
+			document.getElementById('successAlert').classList.add('show');
+			document.getElementById('errorAlert').classList.remove('show');
+		}
+
+		document.getElementById('registerForm').addEventListener('submit', async function (e) {
+			e.preventDefault();
+
+			const btn = document.getElementById('registerBtn');
+			const btnText = document.getElementById('btnText');
+			const spinner = document.getElementById('btnSpinner');
+
+			btn.disabled = true;
+			btnText.textContent = 'Creating...';
+			spinner.classList.remove('d-none');
+
+			const payload = {
+				fullName: document.getElementById('fullName').value,
+				email: document.getElementById('email').value,
+				password: document.getElementById('password').value,
+				role: document.getElementById('role').value
+			};
+
+			try {
+				const res = await fetch(`${BASE_URL}/user/saveUser`, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(payload)
+				});
+
+				const data = await res.json();
+
+				if (res.ok && data.statusCode === 201) {
+					showSuccess();
+					setTimeout(() => window.location.href = 'login.html', 1500);
+				} else {
+					showError(data.message || 'Something went wrong. Please try again.');
+				}
+			} catch (err) {
+				showError('Server error. Please try again.');
+			} finally {
+				btn.disabled = false;
+				btnText.textContent = 'Create Account';
+				spinner.classList.add('d-none');
+			}
+		});
+	</script>
+</body>
+
+</html>

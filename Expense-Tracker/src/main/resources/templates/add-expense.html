@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Add Expense | ExpenseTracker</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap"
+		rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<style>
+		:root {
+			--bg: #0d1117;
+			--card: #161b22;
+			--border: #30363d;
+			--accent: #00e5a0;
+			--accent-dim: rgba(0, 229, 160, 0.12);
+			--text: #e6edf3;
+			--muted: #8b949e;
+			--danger: #f85149;
+			--success: #3fb950;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg);
+			font-family: 'Nunito', sans-serif;
+			color: var(--text);
+		}
+
+		.sidebar {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 240px;
+			height: 100vh;
+			background: var(--card);
+			border-right: 1px solid var(--border);
+			display: flex;
+			flex-direction: column;
+			padding: 1.5rem 1rem;
+			z-index: 100;
+		}
+
+		.sidebar-brand {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0 0.5rem 1.5rem;
+			border-bottom: 1px solid var(--border);
+			margin-bottom: 1.5rem;
+		}
+
+		.sidebar-brand-icon {
+			width: 36px;
+			height: 36px;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			border-radius: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--accent);
+			font-size: 1rem;
+		}
+
+		.sidebar-brand span {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.95rem;
+		}
+
+		.nav-item {
+			list-style: none;
+			margin-bottom: 4px;
+		}
+
+		.nav-link {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			color: var(--muted);
+			text-decoration: none;
+			font-size: 0.88rem;
+			font-weight: 600;
+			transition: all 0.2s;
+		}
+
+		.nav-link:hover {
+			background: var(--accent-dim);
+			color: var(--text);
+		}
+
+		.nav-link.active {
+			background: var(--accent-dim);
+			color: var(--accent);
+			border: 1px solid rgba(0, 229, 160, 0.2);
+		}
+
+		.nav-link i {
+			font-size: 1rem;
+			width: 18px;
+			text-align: center;
+		}
+
+		.sidebar-footer {
+			margin-top: auto;
+			border-top: 1px solid var(--border);
+			padding-top: 1rem;
+		}
+
+		.user-pill {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			background: var(--bg);
+			border: 1px solid var(--border);
+		}
+
+		.user-avatar {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--accent);
+			font-size: 0.85rem;
+			font-weight: 700;
+		}
+
+		.user-info {
+			flex: 1;
+			overflow: hidden;
+		}
+
+		.user-name {
+			font-size: 0.8rem;
+			font-weight: 700;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.user-role {
+			font-size: 0.7rem;
+			color: var(--muted);
+		}
+
+		.btn-logout {
+			background: transparent;
+			border: 1px solid var(--border);
+			color: var(--muted);
+			border-radius: 8px;
+			padding: 5px 14px;
+			font-size: 0.8rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.btn-logout:hover {
+			border-color: var(--danger);
+			color: var(--danger);
+		}
+
+		.main {
+			margin-left: 240px;
+			padding: 2rem;
+			min-height: 100vh;
+		}
+
+		.page-title {
+			font-family: 'Sora', sans-serif;
+			font-size: 1.4rem;
+			font-weight: 800;
+			margin-bottom: 0.25rem;
+		}
+
+		.page-subtitle {
+			font-size: 0.85rem;
+			color: var(--muted);
+			margin-bottom: 2rem;
+		}
+
+		.form-card {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			padding: 2rem;
+			max-width: 680px;
+		}
+
+		.form-label {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 6px;
+		}
+
+		.form-control,
+		.form-select {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			color: var(--text);
+			border-radius: 10px;
+			padding: 0.65rem 1rem;
+			font-family: 'Nunito', sans-serif;
+			font-size: 0.9rem;
+			transition: border-color 0.2s, box-shadow 0.2s;
+		}
+
+		.form-control:focus,
+		.form-select:focus {
+			background: var(--bg);
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px rgba(0, 229, 160, 0.15);
+			color: var(--text);
+		}
+
+		.form-control::placeholder {
+			color: var(--muted);
+		}
+
+		.form-select option {
+			background: var(--card);
+		}
+
+		textarea.form-control {
+			resize: none;
+		}
+
+		/* Category selector */
+		.category-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 8px;
+			margin-top: 6px;
+		}
+
+		.cat-btn {
+			background: var(--bg);
+			border: 1.5px solid var(--border);
+			border-radius: 10px;
+			padding: 0.6rem 0.4rem;
+			cursor: pointer;
+			text-align: center;
+			font-size: 0.75rem;
+			font-weight: 700;
+			color: var(--muted);
+			transition: all 0.2s;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.cat-btn i {
+			font-size: 1.1rem;
+		}
+
+		.cat-btn:hover {
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		.cat-btn.selected {
+			background: var(--accent-dim);
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		/* Payment method */
+		.payment-grid {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: 8px;
+			margin-top: 6px;
+		}
+
+		.pay-btn {
+			background: var(--bg);
+			border: 1.5px solid var(--border);
+			border-radius: 10px;
+			padding: 0.55rem 0.3rem;
+			cursor: pointer;
+			text-align: center;
+			font-size: 0.72rem;
+			font-weight: 700;
+			color: var(--muted);
+			transition: all 0.2s;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.pay-btn i {
+			font-size: 1rem;
+		}
+
+		.pay-btn:hover {
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		.pay-btn.selected {
+			background: var(--accent-dim);
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		.btn-accent {
+			background: var(--accent);
+			border: none;
+			color: #0d1117;
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.9rem;
+			padding: 0.7rem 2rem;
+			border-radius: 10px;
+			transition: opacity 0.2s, transform 0.15s;
+		}
+
+		.btn-accent:hover {
+			opacity: 0.9;
+			transform: translateY(-1px);
+			color: #0d1117;
+		}
+
+		.btn-accent:disabled {
+			opacity: 0.6;
+		}
+
+		.alert-custom {
+			border-radius: 10px;
+			font-size: 0.85rem;
+			padding: 0.65rem 1rem;
+			display: none;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 1.25rem;
+		}
+
+		.alert-custom.show {
+			display: flex;
+		}
+
+		.alert-error {
+			background: rgba(248, 81, 73, 0.1);
+			border: 1px solid rgba(248, 81, 73, 0.3);
+			color: var(--danger);
+		}
+
+		.alert-success {
+			background: rgba(63, 185, 80, 0.1);
+			border: 1px solid rgba(63, 185, 80, 0.3);
+			color: var(--success);
+		}
+
+		.spinner-border-sm {
+			width: 1rem;
+			height: 1rem;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="sidebar">
+		<div class="sidebar-brand">
+			<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+			<span>ExpenseTracker</span>
+		</div>
+		<ul class="nav flex-column" style="gap:2px;">
+			<li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a></li>
+			<li class="nav-item"><a href="add-expense.html" class="nav-link active"><i class="bi bi-plus-circle"></i>
+					Add Expense</a></li>
+			<li class="nav-item"><a href="view-expense.html" class="nav-link"><i class="bi bi-list-ul"></i> View
+					Expenses</a></li>
+			<li class="nav-item"><a href="reports.html" class="nav-link"><i class="bi bi-bar-chart"></i> Reports</a>
+			</li>
+			<li class="nav-item"><a href="change-password.html" class="nav-link"><i class="bi bi-shield-lock"></i>
+					Change Password</a></li>
+		</ul>
+		<div class="sidebar-footer">
+			<div class="user-pill">
+				<div class="user-avatar" id="userAvatar">D</div>
+				<div class="user-info">
+					<div class="user-name" id="userName">Loading...</div>
+					<div class="user-role" id="userRole">User</div>
+				</div>
+				<button class="btn-logout" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
+			</div>
+		</div>
+	</div>
+
+	<div class="main">
+		<div class="page-title">Add Expense</div>
+		<div class="page-subtitle">Record a new expense to your tracker</div>
+
+		<div class="form-card">
+			<div class="alert-custom alert-error" id="errorAlert"><i class="bi bi-exclamation-circle"></i><span
+					id="errorMsg"></span></div>
+			<div class="alert-custom alert-success" id="successAlert"><i class="bi bi-check-circle"></i><span>Expense
+					added successfully!</span></div>
+
+			<form id="expenseForm">
+				<div class="row g-3">
+					<div class="col-12">
+						<label class="form-label">Title *</label>
+						<input type="text" class="form-control" id="title" placeholder="e.g. Lunch at restaurant"
+							required />
+					</div>
+
+					<div class="col-md-6">
+						<label class="form-label">Amount (₹) *</label>
+						<input type="number" class="form-control" id="amount" placeholder="0.00" step="0.01" min="0"
+							required />
+					</div>
+
+					<div class="col-md-3">
+						<label class="form-label">Date *</label>
+						<input type="date" class="form-control" id="date" required />
+					</div>
+
+					<div class="col-md-3">
+						<label class="form-label">Time</label>
+						<input type="time" class="form-control" id="time" />
+					</div>
+
+					<div class="col-12">
+						<label class="form-label">Description</label>
+						<textarea class="form-control" id="description" rows="2"
+							placeholder="Optional note..."></textarea>
+					</div>
+
+					<div class="col-12">
+						<label class="form-label">Category *</label>
+						<div class="category-grid" id="categoryGrid">
+							<div class="cat-btn" data-value="FOOD" onclick="selectCategory(this)"><i
+									class="bi bi-egg-fried"></i>Food</div>
+							<div class="cat-btn" data-value="TRAVEL" onclick="selectCategory(this)"><i
+									class="bi bi-airplane"></i>Travel</div>
+							<div class="cat-btn" data-value="SHOPPING" onclick="selectCategory(this)"><i
+									class="bi bi-bag"></i>Shopping</div>
+							<div class="cat-btn" data-value="BILLS" onclick="selectCategory(this)"><i
+									class="bi bi-receipt"></i>Bills</div>
+							<div class="cat-btn" data-value="ENTERTAINMENT" onclick="selectCategory(this)"><i
+									class="bi bi-controller"></i>Entertainment</div>
+							<div class="cat-btn" data-value="HEALTH" onclick="selectCategory(this)"><i
+									class="bi bi-heart-pulse"></i>Health</div>
+							<div class="cat-btn" data-value="EDUCATION" onclick="selectCategory(this)"><i
+									class="bi bi-book"></i>Education</div>
+							<div class="cat-btn" data-value="OTHER" onclick="selectCategory(this)"><i
+									class="bi bi-three-dots"></i>Other</div>
+						</div>
+						<input type="hidden" id="category" />
+					</div>
+
+					<div class="col-12">
+						<label class="form-label">Payment Method</label>
+						<div class="payment-grid" id="paymentGrid">
+							<div class="pay-btn" data-value="CASH" onclick="selectPayment(this)"><i
+									class="bi bi-cash"></i>Cash</div>
+							<div class="pay-btn" data-value="UPI" onclick="selectPayment(this)"><i
+									class="bi bi-phone"></i>UPI</div>
+							<div class="pay-btn" data-value="CARD" onclick="selectPayment(this)"><i
+									class="bi bi-credit-card"></i>Card</div>
+							<div class="pay-btn" data-value="NET_BANKING" onclick="selectPayment(this)"><i
+									class="bi bi-bank"></i>Net Banking</div>
+							<div class="pay-btn" data-value="WALLET" onclick="selectPayment(this)"><i
+									class="bi bi-wallet"></i>Wallet</div>
+						</div>
+						<input type="hidden" id="paymentMethod" />
+					</div>
+
+					<div class="col-12 mt-2">
+						<button type="submit" class="btn-accent" id="submitBtn">
+							<span id="btnText"><i class="bi bi-plus-circle me-1"></i> Add Expense</span>
+							<span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none"
+								role="status"></span>
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<script>
+		const BASE_URL = 'http://localhost:8080';
+		const user = JSON.parse(sessionStorage.getItem('user'));
+		if (!user) window.location.href = 'login.html';
+
+		document.getElementById('userName').textContent = user.fullName;
+		document.getElementById('userRole').textContent = user.role || 'USER';
+		document.getElementById('userAvatar').textContent = user.fullName.charAt(0).toUpperCase();
+
+		// Default date/time
+		const now = new Date();
+		document.getElementById('date').value = now.toISOString().split('T')[0];
+		document.getElementById('time').value = now.toTimeString().slice(0, 5);
+
+		function selectCategory(el) {
+			document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+			el.classList.add('selected');
+			document.getElementById('category').value = el.dataset.value;
+		}
+
+		function selectPayment(el) {
+			document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+			el.classList.add('selected');
+			document.getElementById('paymentMethod').value = el.dataset.value;
+		}
+
+		document.getElementById('expenseForm').addEventListener('submit', async function (e) {
+			e.preventDefault();
+
+			const category = document.getElementById('category').value;
+			if (!category) {
+				showError('Please select a category');
+				return;
+			}
+
+			const btn = document.getElementById('submitBtn');
+			const btnText = document.getElementById('btnText');
+			const spinner = document.getElementById('btnSpinner');
+			btn.disabled = true;
+			btnText.innerHTML = 'Saving...';
+			spinner.classList.remove('d-none');
+
+			const payload = {
+				title: document.getElementById('title').value,
+				amount: parseFloat(document.getElementById('amount').value),
+				date: document.getElementById('date').value,
+				time: document.getElementById('time').value + ':00',
+				description: document.getElementById('description').value,
+				category: document.getElementById('category').value,
+				paymentMethod: document.getElementById('paymentMethod').value || null
+			};
+
+			try {
+				const res = await fetch(`${BASE_URL}/expense/save/${user.id}`, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(payload)
+				});
+				const data = await res.json();
+
+				if (res.ok && data.statusCode === 201) {
+					document.getElementById('successAlert').classList.add('show');
+					document.getElementById('errorAlert').classList.remove('show');
+					document.getElementById('expenseForm').reset();
+					document.querySelectorAll('.cat-btn, .pay-btn').forEach(b => b.classList.remove('selected'));
+					document.getElementById('category').value = '';
+					document.getElementById('paymentMethod').value = '';
+					document.getElementById('date').value = now.toISOString().split('T')[0];
+					setTimeout(() => document.getElementById('successAlert').classList.remove('show'), 3000);
+				} else {
+					showError(data.message || 'Something went wrong');
+				}
+			} catch (err) {
+				showError('Server error. Please try again.');
+			} finally {
+				btn.disabled = false;
+				btnText.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add Expense';
+				spinner.classList.add('d-none');
+			}
+		});
+
+		function showError(msg) {
+			document.getElementById('errorMsg').textContent = msg;
+			document.getElementById('errorAlert').classList.add('show');
+			document.getElementById('successAlert').classList.remove('show');
+		}
+		function logout() {sessionStorage.clear(); window.location.href = 'login.html';}
+	</script>
+</body>
+
+</html>
