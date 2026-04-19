@@ -466,6 +466,7 @@
 			color: var(--muted);
 		}
 	</style>
+	<script src="theme.js"></script>
 </head>
 
 <body>
@@ -486,6 +487,7 @@
 					Change Password</a></li>
 		</ul>
 		<div class="sidebar-footer">
+			<div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;" id="themeToggleWrap"></div>
 			<div class="user-pill">
 				<div class="user-avatar" id="userAvatar">D</div>
 				<div class="user-info">
@@ -711,6 +713,8 @@
 
 		function logout() {sessionStorage.clear(); window.location.href = 'login.html';}
 		loadWeekly();
+		// ─── Theme toggle init
+		document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();
 	</script>
 </body>
 

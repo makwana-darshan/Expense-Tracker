@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local secrets — never push
+src/main/resources/application-local.properties
+

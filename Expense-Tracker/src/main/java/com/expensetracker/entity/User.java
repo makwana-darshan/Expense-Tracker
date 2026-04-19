@@ -3,12 +3,12 @@ package com.expensetracker.entity;
 import java.time.LocalDateTime;
 
 import com.expensetracker.enums.Roles;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Entity
@@ -39,15 +39,18 @@ public class User {
 
 	private Boolean status;
 
-	private LocalDateTime createdAt;
+	@Pattern(regexp = "^[+]?[0-9]{7,15}$", message = "Please provide a valid phone number")
+	private String phone;
 
+	// Relative path to uploaded photo e.g. "uploads/profile-photos/user_1_uuid.jpg"
+	private String profilePhoto;
+
+	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 
-	// 🔹 Default Constructor (REQUIRED for JPA)
 	public User() {
 	}
 
-	// 🔹 Parameterized Constructor
 	public User(String fullName, String email, String password, Roles role, Boolean status) {
 		this.fullName = fullName;
 		this.email = email;
@@ -56,19 +59,16 @@ public class User {
 		this.status = status;
 	}
 
-	// 🔹 Auto timestamp
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = LocalDateTime.now();
-		this.status = true; // default active
+		this.status = true;
 	}
 
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
-
-	// 🔹 Getters and Setters
 
 	public Long getId() {
 		return id;
@@ -112,6 +112,22 @@ public class User {
 
 	public void setStatus(Boolean status) {
 		this.status = status;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getProfilePhoto() {
+		return profilePhoto;
+	}
+
+	public void setProfilePhoto(String profilePhoto) {
+		this.profilePhoto = profilePhoto;
 	}
 
 	public LocalDateTime getCreatedAt() {

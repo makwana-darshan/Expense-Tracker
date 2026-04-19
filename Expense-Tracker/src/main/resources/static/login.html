@@ -253,6 +253,7 @@
 			height: 1rem;
 		}
 	</style>
+	<script src="theme.js"></script>
 </head>
 
 <body>
@@ -364,6 +365,9 @@
 			}
 		});
 	</script>
+	<!-- Theme toggle (fixed top-right) -->
+	<div id="themeToggleWrap" style="position:fixed;top:1rem;right:1rem;z-index:9999;"></div>
+	<script>document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();</script>
 </body>
 
 </html>
