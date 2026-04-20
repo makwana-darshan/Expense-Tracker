@@ -63,6 +63,7 @@ public class ExpenseDao {
 	public List<Expense> getExpenseByDateRangeAllUsers(LocalDate startDate, LocalDate endDate) {
 		return expenseRepository.getExpenseByDateRangeAllUsers(startDate, endDate);
 	}
+	
 
 	// ─── Report methods ────────────────────────────────────────────────────────
 

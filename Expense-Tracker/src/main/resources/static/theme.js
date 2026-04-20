@@ -1,123 +1,121 @@
 /**
  * theme.js — Dark / Light mode toggle
- * Shared across all pages. Include with <script src="theme.js"></script>
- *
- * Dark mode  = default (CSS :root variables)
- * Light mode = [data-theme="light"] overrides on <html>
- *
- * Preference is saved to localStorage so it persists across pages.
+ * Add <script src="theme.js"></script> in <head> of every page
+ * Add <div id="themeToggleWrap"></div> wherever you want the button
  */
 
 (function() {
-    // ─── Light mode CSS variable overrides ───────────────────────────────────────
-    const LIGHT_STYLES = `
-    [data-theme="light"] {
-      --bg:        #f0f2f5;
-      --card:      #ffffff;
-      --border:    #d0d7de;
-      --accent:    #00a878;
-      --accent-dim: rgba(0, 168, 120, 0.10);
-      --text:      #1f2328;
-      --muted:     #57606a;
-      --danger:    #cf222e;
-      --warning:   #9a6700;
-      --info:      #0550ae;
-      --success:   #1a7f37;
-    }
-    [data-theme="light"] body {
-      background: var(--bg);
-      color: var(--text);
-    }
-    [data-theme="light"] .expenses-table tr:hover td {
-      background: rgba(0,0,0,0.02);
-    }
-    [data-theme="light"] input,
-    [data-theme="light"] select,
-    [data-theme="light"] textarea {
-      background: #ffffff !important;
-      color: var(--text) !important;
-      border-color: var(--border) !important;
-    }
-    [data-theme="light"] input::placeholder,
-    [data-theme="light"] select::placeholder,
-    [data-theme="light"] textarea::placeholder {
-      color: var(--muted) !important;
-    }
-  `;
+    // ── 1. CSS variables for both themes
+    const THEMES = {
+        dark: {
+            '--bg': '#0d1117',
+            '--card': '#161b22',
+            '--border': '#30363d',
+            '--accent': '#00e5a0',
+            '--accent-dim': 'rgba(0,229,160,0.12)',
+            '--text': '#e6edf3',
+            '--muted': '#8b949e',
+            '--danger': '#f85149',
+            '--warning': '#e3b341',
+            '--info': '#388bfd',
+        },
+        light: {
+            '--bg': '#f6f8fa',
+            '--card': '#ffffff',
+            '--border': '#d0d7de',
+            '--accent': '#00a870',
+            '--accent-dim': 'rgba(0,168,112,0.10)',
+            '--text': '#1f2328',
+            '--muted': '#656d76',
+            '--danger': '#cf222e',
+            '--warning': '#9a6700',
+            '--info': '#0969da',
+        }
+    };
 
-    // ─── Inject light-mode stylesheet once ───────────────────────────────────────
-    function injectStyles() {
-        if (document.getElementById('theme-overrides')) return;
-        const style = document.createElement('style');
-        style.id = 'theme-overrides';
-        style.textContent = LIGHT_STYLES;
-        document.head.appendChild(style);
-    }
-
-    // ─── Apply saved theme immediately (before paint — avoids flash) ─────────────
+    // ── 2. Apply theme variables to :root
     function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
+        const root = document.documentElement;
+        const vars = THEMES[theme];
+        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+        root.setAttribute('data-theme', theme);
+        localStorage.setItem('et_theme', theme);
     }
 
-    const saved = localStorage.getItem('et-theme') || 'dark';
-    applyTheme(saved);
+    // ── 3. Get saved or default theme
+    function getSavedTheme() {
+        return localStorage.getItem('et_theme') || 'dark';
+    }
 
-    // ─── Toggle function called by the button ─────────────────────────────────────
-    window.toggleTheme = function() {
+    // ── 4. Toggle
+    function toggleTheme() {
         const current = document.documentElement.getAttribute('data-theme') || 'dark';
         const next = current === 'dark' ? 'light' : 'dark';
         applyTheme(next);
-        localStorage.setItem('et-theme', next);
-        updateToggleBtn();
-    };
+        updateToggleUI(next);
+    }
 
-    // ─── Update button icon + label ───────────────────────────────────────────────
-    window.updateToggleBtn = function() {
+    // ── 5. Update button icon + label
+    function updateToggleUI(theme) {
         const btn = document.getElementById('themeToggleBtn');
         if (!btn) return;
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        btn.innerHTML = isDark
-            ? '<i class="bi bi-sun-fill"></i>'
-            : '<i class="bi bi-moon-fill"></i>';
-        btn.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-    };
+        if (theme === 'dark') {
+            btn.innerHTML = `<i class="bi bi-sun"></i> <span>Light Mode</span>`;
+            btn.title = 'Switch to light mode';
+        } else {
+            btn.innerHTML = `<i class="bi bi-moon-stars"></i> <span>Dark Mode</span>`;
+            btn.title = 'Switch to dark mode';
+        }
+    }
 
-    // ─── Render the toggle button HTML ────────────────────────────────────────────
-    window.renderThemeToggle = function() {
-        injectStyles();
-        const isDark = (localStorage.getItem('et-theme') || 'dark') === 'dark';
+    // ── 6. Render toggle button HTML
+    function renderThemeToggle() {
+        const theme = getSavedTheme();
+        const icon = theme === 'dark' ? 'bi-sun' : 'bi-moon-stars';
+        const label = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
         return `
       <button
         id="themeToggleBtn"
-        onclick="toggleTheme()"
-        title="${isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}"
+        onclick="window.__toggleTheme()"
+        title="Toggle theme"
         style="
-          background: var(--accent-dim);
-          border: 1px solid var(--border);
-          color: var(--text);
-          border-radius: 8px;
-          width: 36px;
-          height: 36px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          font-size: 1rem;
-          transition: all 0.2s;
-          flex-shrink: 0;
+          display:flex;align-items:center;gap:6px;
+          background:transparent;
+          border:1px solid var(--border);
+          color:var(--muted);
+          border-radius:8px;
+          padding:5px 12px;
+          font-size:0.78rem;
+          font-weight:600;
+          font-family:'Nunito',sans-serif;
+          cursor:pointer;
+          transition:all 0.2s;
+          width:100%;
+          justify-content:center;
+          margin-bottom:8px;
         "
-        onmouseover="this.style.borderColor='var(--accent)'"
-        onmouseout="this.style.borderColor='var(--border)'"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)';"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';"
       >
-        ${isDark ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>'}
+        <i class="bi ${icon}"></i> <span>${label}</span>
       </button>
     `;
-    };
-
-    // Run injectStyles on DOMContentLoaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectStyles);
-    } else {
-        injectStyles();
     }
+
+    // ── 7. Expose globally
+    window.__toggleTheme = toggleTheme;
+    window.renderThemeToggle = renderThemeToggle;
+
+    // ── 8. Apply immediately on script load (before DOM paint)
+    applyTheme(getSavedTheme());
+
+    // ── 9. After DOM ready, inject button if wrap exists
+    document.addEventListener('DOMContentLoaded', function() {
+        const wrap = document.getElementById('themeToggleWrap');
+        if (wrap) {
+            wrap.innerHTML = renderThemeToggle();
+        }
+        updateToggleUI(getSavedTheme());
+    });
+
 })();
