@@ -16,8 +16,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.expensetracker.configuration.JwtUtil;
+import com.expensetracker.configuration.SecurityUtils;
 import com.expensetracker.dao.UserDao;
 import com.expensetracker.dto.ChangePasswordRequest;
+import com.expensetracker.dto.LoginResponse;
 import com.expensetracker.dto.UpdateProfileRequest;
 import com.expensetracker.dto.ResponseStructure;
 import com.expensetracker.entity.User;
@@ -35,6 +38,12 @@ public class UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private JwtUtil jwtUtil;
+
+	@Autowired
+	private SecurityUtils securityUtils;
 
 	@Value("${app.upload.dir:uploads/profile-photos}")
 	private String uploadDir;
@@ -54,32 +63,33 @@ public class UserService {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-	// ─── Login ─────────────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<User>> login(String email, String password) {
+	// ─── Login — returns JWT token ─────────────────────────────────────────────
+	public ResponseEntity<ResponseStructure<LoginResponse>> login(String email, String password) {
 		User user = userDao.findByEmail(email);
 
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("No account found with email: " + email);
-		}
-		if (!passwordEncoder.matches(password, user.getPassword())) {
+		if (!passwordEncoder.matches(password, user.getPassword()))
 			throw new InvalidPasswordException("Incorrect password. Please try again.");
-		}
 
-		ResponseStructure<User> response = new ResponseStructure<>();
+		String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getRole().name());
+		LoginResponse loginResponse = new LoginResponse(token, user);
+
+		ResponseStructure<LoginResponse> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.OK.value());
 		response.setMessage("Login successful");
-		response.setData(user);
+		response.setData(loginResponse);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// ─── Get Profile ───────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<User>> getProfile(Long userId, Long requesterId) {
-		verifyOwnerOrAdmin(requesterId, userId);
+	public ResponseEntity<ResponseStructure<User>> getProfile(Long userId) {
+		User caller = securityUtils.getCurrentUser();
+		verifyOwnerOrAdmin(caller, userId);
 
 		User user = userDao.getUserById(userId);
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("User not found with id: " + userId);
-		}
 
 		ResponseStructure<User> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.OK.value());
@@ -89,22 +99,19 @@ public class UserService {
 	}
 
 	// ─── Update Profile ────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<User>> updateProfile(Long userId, UpdateProfileRequest request,
-			Long requesterId) {
-		verifyOwnerOrAdmin(requesterId, userId);
+	public ResponseEntity<ResponseStructure<User>> updateProfile(Long userId, UpdateProfileRequest request) {
+		User caller = securityUtils.getCurrentUser();
+		verifyOwnerOrAdmin(caller, userId);
 
 		User user = userDao.getUserById(userId);
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("User not found with id: " + userId);
-		}
 
-		// Check new email is not taken by another account
 		if (!user.getEmail().equalsIgnoreCase(request.getEmail())) {
-			User existingWithEmail = userDao.findByEmail(request.getEmail());
-			if (existingWithEmail != null && !existingWithEmail.getId().equals(userId)) {
+			User existing = userDao.findByEmail(request.getEmail());
+			if (existing != null && !existing.getId().equals(userId))
 				throw new DuplicateEmailException(
 						"Email '" + request.getEmail() + "' is already in use by another account");
-			}
 		}
 
 		user.setFullName(request.getFullName());
@@ -119,42 +126,35 @@ public class UserService {
 	}
 
 	// ─── Upload Profile Photo ──────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<String>> uploadProfilePhoto(Long userId, MultipartFile file,
-			Long requesterId) {
-		verifyOwnerOrAdmin(requesterId, userId);
+	public ResponseEntity<ResponseStructure<String>> uploadProfilePhoto(Long userId, MultipartFile file) {
+		User caller = securityUtils.getCurrentUser();
+		verifyOwnerOrAdmin(caller, userId);
 
 		User user = userDao.getUserById(userId);
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("User not found with id: " + userId);
-		}
 
-		if (file == null || file.isEmpty()) {
+		if (file == null || file.isEmpty())
 			throw new IllegalArgumentException("Please select a file to upload");
-		}
 
 		String contentType = file.getContentType();
-		if (contentType == null || !contentType.startsWith("image/")) {
+		if (contentType == null || !contentType.startsWith("image/"))
 			throw new IllegalArgumentException("Only image files (JPG, PNG, WEBP) are allowed");
-		}
 
 		String originalFilename = file.getOriginalFilename();
 		String extension = "";
-		if (originalFilename != null && originalFilename.contains(".")) {
+		if (originalFilename != null && originalFilename.contains("."))
 			extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
-		}
 
-		if (!extension.matches("\\.(jpg|jpeg|png|webp)")) {
+		if (!extension.matches("\\.(jpg|jpeg|png|webp)"))
 			throw new IllegalArgumentException("Allowed formats: JPG, JPEG, PNG, WEBP");
-		}
 
 		try {
 			Path uploadPath = Paths.get(uploadDir);
 			Files.createDirectories(uploadPath);
 
-			// Delete old photo if exists
-			if (user.getProfilePhoto() != null) {
+			if (user.getProfilePhoto() != null)
 				Files.deleteIfExists(Paths.get(user.getProfilePhoto()));
-			}
 
 			String newFilename = "user_" + userId + "_" + UUID.randomUUID() + extension;
 			Path filePath = uploadPath.resolve(newFilename);
@@ -177,17 +177,13 @@ public class UserService {
 
 	// ─── Change Password ───────────────────────────────────────────────────────
 	public ResponseEntity<ResponseStructure<String>> changePassword(ChangePasswordRequest request) {
-		User user = userDao.getUserById((long) request.getUserId());
+		User caller = securityUtils.getCurrentUser();
 
-		if (user == null) {
-			throw new UserNotFoundException("User not found with id: " + request.getUserId());
-		}
-		if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+		if (!passwordEncoder.matches(request.getOldPassword(), caller.getPassword()))
 			throw new InvalidPasswordException("Old password is incorrect");
-		}
 
-		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-		userDao.saveUser(user);
+		caller.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		userDao.saveUser(caller);
 
 		ResponseStructure<String> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.OK.value());
@@ -196,7 +192,7 @@ public class UserService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Get All Users (ADMIN only) ────────────────────────────────────────────
+	// ─── Get All Users ─────────────────────────────────────────────────────────
 	public ResponseEntity<ResponseStructure<List<User>>> getAllUsers() {
 		ResponseStructure<List<User>> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.OK.value());
@@ -208,9 +204,8 @@ public class UserService {
 	// ─── Get User By ID ────────────────────────────────────────────────────────
 	public ResponseEntity<ResponseStructure<User>> getUserById(Long id) {
 		User user = userDao.getUserById(id);
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("User not found with id: " + id);
-		}
 
 		ResponseStructure<User> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.OK.value());
@@ -219,12 +214,11 @@ public class UserService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Delete User (ADMIN only) ──────────────────────────────────────────────
+	// ─── Delete User ───────────────────────────────────────────────────────────
 	public ResponseEntity<ResponseStructure<String>> deleteUser(Long id) {
 		User user = userDao.getUserById(id);
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("User not found with id: " + id);
-		}
 
 		userDao.deleteUser(id);
 
@@ -235,12 +229,11 @@ public class UserService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Update User Role (ADMIN only) ────────────────────────────────────────
+	// ─── Update User Role ──────────────────────────────────────────────────────
 	public ResponseEntity<ResponseStructure<User>> updateUserRole(Long id, Roles role) {
 		User user = userDao.getUserById(id);
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("User not found with id: " + id);
-		}
 
 		user.setRole(role);
 		userDao.saveUser(user);
@@ -255,21 +248,15 @@ public class UserService {
 	// ─── Verify requester is ADMIN ─────────────────────────────────────────────
 	public void verifyAdminAccess(Long requesterId) {
 		User requester = userDao.getUserById(requesterId);
-		if (requester == null) {
+		if (requester == null)
 			throw new UserNotFoundException("Requesting user not found with id: " + requesterId);
-		}
-		if (requester.getRole() != Roles.ADMIN) {
+		if (requester.getRole() != Roles.ADMIN)
 			throw new UnauthorizedAccessException("Access denied: only ADMIN can perform this action");
-		}
 	}
 
-	// ─── Verify owner or ADMIN ────────────────────────────────────────────────
-	private void verifyOwnerOrAdmin(Long requesterId, Long targetUserId) {
-		User requester = userDao.getUserById(requesterId);
-		if (requester == null) {
-			throw new UserNotFoundException("Requesting user not found with id: " + requesterId);
-		}
-		if (requester.getRole() != Roles.ADMIN && !requesterId.equals(targetUserId)) {
+	// ─── Internal helpers ──────────────────────────────────────────────────────
+	private void verifyOwnerOrAdmin(User caller, Long targetUserId) {
+		if (caller.getRole() != Roles.ADMIN && !caller.getId().equals(targetUserId)) {
 			throw new UnauthorizedAccessException("Access denied: you can only access your own profile");
 		}
 	}

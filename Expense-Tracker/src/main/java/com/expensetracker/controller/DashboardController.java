@@ -19,16 +19,11 @@ public class DashboardController {
 	@Autowired
 	private DashboardService dashboardService;
 
-	// GET /dashboard/{userId}?requesterId=1
-	// GET /dashboard/{userId}?requesterId=1&year=2025
 	@GetMapping("/{userId}")
 	public ResponseEntity<ResponseStructure<DashboardResponse>> getDashboard(@PathVariable Long userId,
-			@RequestParam Long requesterId, @RequestParam(defaultValue = "0") int year) {
-
-		if (year == 0) {
+			@RequestParam(defaultValue = "0") int year) {
+		if (year == 0)
 			year = java.time.LocalDate.now().getYear();
-		}
-
-		return dashboardService.getDashboard(userId, year, requesterId);
+		return dashboardService.getDashboard(userId, year);
 	}
 }

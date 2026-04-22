@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.expensetracker.configuration.SecurityUtils;
 import com.expensetracker.dao.ExpenseDao;
 import com.expensetracker.dao.RecurringExpenseDao;
 import com.expensetracker.dao.UserDao;
@@ -26,57 +27,42 @@ public class RecurringExpenseService {
 
 	@Autowired
 	private RecurringExpenseDao recurringExpenseDao;
-
 	@Autowired
 	private ExpenseDao expenseDao;
-
 	@Autowired
 	private UserDao userDao;
+	@Autowired
+	private SecurityUtils securityUtils;
 
-	// ─── Helper ───────────────────────────────────────────────────────────────
-	private void checkAccess(Long requesterId, Long targetUserId) {
-		User requester = userDao.getUserById(requesterId);
-		if (requester == null) {
-			throw new UserNotFoundException("Requesting user not found with id: " + requesterId);
-		}
-		if (requester.getRole() != Roles.ADMIN && !requesterId.equals(targetUserId)) {
-			throw new UnauthorizedAccessException(
-					"Access denied: you can only manage your own recurring expenses");
-		}
+	private void checkAccess(User caller, Long targetUserId) {
+		if (caller.getRole() != Roles.ADMIN && !caller.getId().equals(targetUserId))
+			throw new UnauthorizedAccessException("Access denied: you can only manage your own recurring expenses");
 	}
 
-	// ─── Create ───────────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<RecurringExpense>> create(RecurringExpense recurring,
-			Long userId, Long requesterId) {
-		checkAccess(requesterId, userId);
+	public ResponseEntity<ResponseStructure<RecurringExpense>> create(RecurringExpense recurring, Long userId) {
+		User caller = securityUtils.getCurrentUser();
+		checkAccess(caller, userId);
 
 		User user = userDao.getUserById(userId);
-		if (user == null) {
+		if (user == null)
 			throw new UserNotFoundException("User not found with id: " + userId);
-		}
 
 		recurring.setUser(user);
-		if (recurring.getNextDueDate() == null) {
+		if (recurring.getNextDueDate() == null)
 			recurring.setNextDueDate(recurring.getStartDate());
-		}
-
-		RecurringExpense saved = recurringExpenseDao.save(recurring);
 
 		ResponseStructure<RecurringExpense> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.CREATED.value());
 		response.setMessage("Recurring expense created successfully");
-		response.setData(saved);
+		response.setData(recurringExpenseDao.save(recurring));
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-	// ─── Get All ──────────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getAllByUser(Long userId,
-			Long requesterId) {
-		checkAccess(requesterId, userId);
-
-		if (userDao.getUserById(userId) == null) {
+	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getAllByUser(Long userId) {
+		User caller = securityUtils.getCurrentUser();
+		checkAccess(caller, userId);
+		if (userDao.getUserById(userId) == null)
 			throw new UserNotFoundException("User not found with id: " + userId);
-		}
 
 		ResponseStructure<List<RecurringExpense>> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.OK.value());
@@ -85,14 +71,11 @@ public class RecurringExpenseService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Get Active ───────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getActiveByUser(Long userId,
-			Long requesterId) {
-		checkAccess(requesterId, userId);
-
-		if (userDao.getUserById(userId) == null) {
+	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getActiveByUser(Long userId) {
+		User caller = securityUtils.getCurrentUser();
+		checkAccess(caller, userId);
+		if (userDao.getUserById(userId) == null)
 			throw new UserNotFoundException("User not found with id: " + userId);
-		}
 
 		ResponseStructure<List<RecurringExpense>> response = new ResponseStructure<>();
 		response.setStatusCode(HttpStatus.OK.value());
@@ -101,15 +84,13 @@ public class RecurringExpenseService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Update ───────────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<RecurringExpense>> update(Long id,
-			RecurringExpense updated, Long requesterId) {
+	public ResponseEntity<ResponseStructure<RecurringExpense>> update(Long id, RecurringExpense updated) {
 		RecurringExpense existing = recurringExpenseDao.getById(id);
-		if (existing == null) {
+		if (existing == null)
 			throw new ExpenseNotFoundException("Recurring expense not found with id: " + id);
-		}
 
-		checkAccess(requesterId, existing.getUser().getId());
+		User caller = securityUtils.getCurrentUser();
+		checkAccess(caller, existing.getUser().getId());
 
 		existing.setTitle(updated.getTitle());
 		existing.setDescription(updated.getDescription());
@@ -128,14 +109,13 @@ public class RecurringExpenseService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Pause ────────────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<RecurringExpense>> pause(Long id, Long requesterId) {
+	public ResponseEntity<ResponseStructure<RecurringExpense>> pause(Long id) {
 		RecurringExpense existing = recurringExpenseDao.getById(id);
-		if (existing == null) {
+		if (existing == null)
 			throw new ExpenseNotFoundException("Recurring expense not found with id: " + id);
-		}
 
-		checkAccess(requesterId, existing.getUser().getId());
+		User caller = securityUtils.getCurrentUser();
+		checkAccess(caller, existing.getUser().getId());
 		existing.setActive(false);
 
 		ResponseStructure<RecurringExpense> response = new ResponseStructure<>();
@@ -145,14 +125,13 @@ public class RecurringExpenseService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Resume ───────────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<RecurringExpense>> resume(Long id, Long requesterId) {
+	public ResponseEntity<ResponseStructure<RecurringExpense>> resume(Long id) {
 		RecurringExpense existing = recurringExpenseDao.getById(id);
-		if (existing == null) {
+		if (existing == null)
 			throw new ExpenseNotFoundException("Recurring expense not found with id: " + id);
-		}
 
-		checkAccess(requesterId, existing.getUser().getId());
+		User caller = securityUtils.getCurrentUser();
+		checkAccess(caller, existing.getUser().getId());
 		existing.setActive(true);
 
 		ResponseStructure<RecurringExpense> response = new ResponseStructure<>();
@@ -162,14 +141,13 @@ public class RecurringExpenseService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Delete ───────────────────────────────────────────────────────────────
-	public ResponseEntity<ResponseStructure<String>> delete(Long id, Long requesterId) {
+	public ResponseEntity<ResponseStructure<String>> delete(Long id) {
 		RecurringExpense existing = recurringExpenseDao.getById(id);
-		if (existing == null) {
+		if (existing == null)
 			throw new ExpenseNotFoundException("Recurring expense not found with id: " + id);
-		}
 
-		checkAccess(requesterId, existing.getUser().getId());
+		User caller = securityUtils.getCurrentUser();
+		checkAccess(caller, existing.getUser().getId());
 		recurringExpenseDao.delete(id);
 
 		ResponseStructure<String> response = new ResponseStructure<>();
@@ -179,21 +157,18 @@ public class RecurringExpenseService {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	// ─── Scheduler: runs every day at midnight ────────────────────────────────
 	@Scheduled(cron = "0 0 0 * * *")
 	public void processRecurringExpenses() {
 		LocalDate today = LocalDate.now();
 		List<RecurringExpense> dueList = recurringExpenseDao.getDueRecurring(today);
 
 		for (RecurringExpense recurring : dueList) {
-			// Past end date — deactivate and skip
 			if (recurring.getEndDate() != null && today.isAfter(recurring.getEndDate())) {
 				recurring.setActive(false);
 				recurringExpenseDao.save(recurring);
 				continue;
 			}
 
-			// Create actual expense record
 			Expense expense = new Expense();
 			expense.setTitle(recurring.getTitle());
 			expense.setDescription(recurring.getDescription());
@@ -205,7 +180,6 @@ public class RecurringExpenseService {
 			expense.setUser(recurring.getUser());
 			expenseDao.saveExpense(expense);
 
-			// Advance next due date
 			recurring.setNextDueDate(advanceDate(recurring.getNextDueDate(), recurring));
 			recurringExpenseDao.save(recurring);
 		}
@@ -213,11 +187,16 @@ public class RecurringExpenseService {
 
 	private LocalDate advanceDate(LocalDate current, RecurringExpense recurring) {
 		switch (recurring.getFrequency()) {
-			case DAILY:   return current.plusDays(1);
-			case WEEKLY:  return current.plusWeeks(1);
-			case MONTHLY: return current.plusMonths(1);
-			case YEARLY:  return current.plusYears(1);
-			default:      return current.plusMonths(1);
+		case DAILY:
+			return current.plusDays(1);
+		case WEEKLY:
+			return current.plusWeeks(1);
+		case MONTHLY:
+			return current.plusMonths(1);
+		case YEARLY:
+			return current.plusYears(1);
+		default:
+			return current.plusMonths(1);
 		}
 	}
 }

@@ -33,65 +33,54 @@ public class ExpenseController {
 
 	@PostMapping("/save/{userId}")
 	public ResponseEntity<ResponseStructure<Expense>> saveExpense(@Valid @RequestBody Expense expense,
-			@PathVariable Long userId, @RequestParam Long requesterId) {
-		return expenseService.saveExpense(expense, userId, requesterId);
+			@PathVariable Long userId) {
+		return expenseService.saveExpense(expense, userId);
 	}
 
 	@GetMapping("/getAll/{userId}")
-	public ResponseEntity<ResponseStructure<List<Expense>>> getAllExpenseByUser(@PathVariable Long userId,
-			@RequestParam Long requesterId) {
-		return expenseService.getAllExpenseByUser(userId, requesterId);
+	public ResponseEntity<ResponseStructure<List<Expense>>> getAllExpenseByUser(@PathVariable Long userId) {
+		return expenseService.getAllExpenseByUser(userId);
 	}
 
 	@GetMapping("/getAll")
-	public ResponseEntity<ResponseStructure<List<Expense>>> getAllExpenses(@RequestParam Long requesterId) {
-		return expenseService.getAllExpenses(requesterId);
+	public ResponseEntity<ResponseStructure<List<Expense>>> getAllExpenses() {
+		return expenseService.getAllExpenses();
 	}
 
 	@GetMapping("/getAll/{userId}/paginated")
 	public ResponseEntity<ResponseStructure<PageResponse<Expense>>> getAllExpensePaginated(@PathVariable Long userId,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-			@RequestParam(defaultValue = "date") String sortBy, @RequestParam(defaultValue = "desc") String sortDir,
-			@RequestParam Long requesterId) {
-		return expenseService.getAllExpensePaginated(userId, page, size, sortBy, sortDir, requesterId);
+			@RequestParam(defaultValue = "date") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
+		return expenseService.getAllExpensePaginated(userId, page, size, sortBy, sortDir);
 	}
 
-	// USER/ADMIN: search own expenses by date range
-	// GET
-	// /expense/search/{userId}?startDate=2025-01-01&endDate=2025-01-31&requesterId=1
 	@GetMapping("/search/{userId}")
 	public ResponseEntity<ResponseStructure<DateRangeResponse>> searchByDateRange(@PathVariable Long userId,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-			@RequestParam Long requesterId) {
-		return expenseService.searchByDateRange(userId, startDate, endDate, requesterId);
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+		return expenseService.searchByDateRange(userId, startDate, endDate);
 	}
 
-	// ADMIN only: search ALL users' expenses by date range
-	// GET /expense/search?startDate=2025-01-01&endDate=2025-01-31&requesterId=1
 	@GetMapping("/search")
 	public ResponseEntity<ResponseStructure<DateRangeResponse>> searchByDateRangeAllUsers(
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-			@RequestParam Long requesterId) {
-		return expenseService.searchByDateRangeAllUsers(startDate, endDate, requesterId);
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+		return expenseService.searchByDateRangeAllUsers(startDate, endDate);
 	}
 
 	@GetMapping("/get/{id}")
-	public ResponseEntity<ResponseStructure<Expense>> getExpenseById(@PathVariable Long id,
-			@RequestParam Long requesterId) {
-		return expenseService.getExpenseById(id, requesterId);
+	public ResponseEntity<ResponseStructure<Expense>> getExpenseById(@PathVariable Long id) {
+		return expenseService.getExpenseById(id);
 	}
 
 	@PutMapping("/update/{id}")
 	public ResponseEntity<ResponseStructure<Expense>> updateExpense(@Valid @PathVariable Long id,
-			@RequestBody Expense expense, @RequestParam Long requesterId) {
-		return expenseService.updateExpense(id, expense, requesterId);
+			@RequestBody Expense expense) {
+		return expenseService.updateExpense(id, expense);
 	}
 
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<ResponseStructure<String>> deleteExpense(@PathVariable Long id,
-			@RequestParam Long requesterId) {
-		return expenseService.deleteExpense(id, requesterId);
+	public ResponseEntity<ResponseStructure<String>> deleteExpense(@PathVariable Long id) {
+		return expenseService.deleteExpense(id);
 	}
 }

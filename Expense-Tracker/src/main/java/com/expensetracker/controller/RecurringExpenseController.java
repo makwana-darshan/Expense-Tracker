@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.expensetracker.dto.ResponseStructure;
@@ -27,51 +26,40 @@ public class RecurringExpenseController {
 	@Autowired
 	private RecurringExpenseService recurringExpenseService;
 
-	// POST /recurring/save/{userId}?requesterId=1
 	@PostMapping("/save/{userId}")
 	public ResponseEntity<ResponseStructure<RecurringExpense>> create(@Valid @RequestBody RecurringExpense recurring,
-			@PathVariable Long userId, @RequestParam Long requesterId) {
-		return recurringExpenseService.create(recurring, userId, requesterId);
+			@PathVariable Long userId) {
+		return recurringExpenseService.create(recurring, userId);
 	}
 
-	// GET /recurring/getAll/{userId}?requesterId=1
 	@GetMapping("/getAll/{userId}")
-	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getAllByUser(@PathVariable Long userId,
-			@RequestParam Long requesterId) {
-		return recurringExpenseService.getAllByUser(userId, requesterId);
+	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getAllByUser(@PathVariable Long userId) {
+		return recurringExpenseService.getAllByUser(userId);
 	}
 
-	// GET /recurring/getActive/{userId}?requesterId=1
 	@GetMapping("/getActive/{userId}")
-	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getActiveByUser(@PathVariable Long userId,
-			@RequestParam Long requesterId) {
-		return recurringExpenseService.getActiveByUser(userId, requesterId);
+	public ResponseEntity<ResponseStructure<List<RecurringExpense>>> getActiveByUser(@PathVariable Long userId) {
+		return recurringExpenseService.getActiveByUser(userId);
 	}
 
-	// PUT /recurring/update/{id}?requesterId=1
 	@PutMapping("/update/{id}")
 	public ResponseEntity<ResponseStructure<RecurringExpense>> update(@PathVariable Long id,
-			@Valid @RequestBody RecurringExpense recurring, @RequestParam Long requesterId) {
-		return recurringExpenseService.update(id, recurring, requesterId);
+			@Valid @RequestBody RecurringExpense recurring) {
+		return recurringExpenseService.update(id, recurring);
 	}
 
-	// PUT /recurring/pause/{id}?requesterId=1
 	@PutMapping("/pause/{id}")
-	public ResponseEntity<ResponseStructure<RecurringExpense>> pause(@PathVariable Long id,
-			@RequestParam Long requesterId) {
-		return recurringExpenseService.pause(id, requesterId);
+	public ResponseEntity<ResponseStructure<RecurringExpense>> pause(@PathVariable Long id) {
+		return recurringExpenseService.pause(id);
 	}
 
-	// PUT /recurring/resume/{id}?requesterId=1
 	@PutMapping("/resume/{id}")
-	public ResponseEntity<ResponseStructure<RecurringExpense>> resume(@PathVariable Long id,
-			@RequestParam Long requesterId) {
-		return recurringExpenseService.resume(id, requesterId);
+	public ResponseEntity<ResponseStructure<RecurringExpense>> resume(@PathVariable Long id) {
+		return recurringExpenseService.resume(id);
 	}
 
-	// DELETE /recurring/delete/{id}?requesterId=1
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<ResponseStructure<String>> delete(@PathVariable Long id, @RequestParam Long requesterId) {
-		return recurringExpenseService.delete(id, requesterId);
+	public ResponseEntity<ResponseStructure<String>> delete(@PathVariable Long id) {
+		return recurringExpenseService.delete(id);
 	}
 }
