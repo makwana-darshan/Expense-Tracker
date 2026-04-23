@@ -34,7 +34,10 @@ public class SecurityConfig {
 						.permitAll()
 
 						// ── Static frontend files ────────────────────────────────────
-						.requestMatchers("/", "/*.html", "/*.js", "/*.css", "/*.ico", "/uploads/**").permitAll()
+						.requestMatchers("/", "/*.html", "/*.js", "/*.css", "/*.ico", "/uploads/**", "/login",
+								"/register", "/dashboard", "/add-expense", "/view-expense", "/reports",
+								"/change-password")
+						.permitAll()
 
 						// ── ADMIN-only endpoints ─────────────────────────────────────
 						.requestMatchers("/admin/**").hasRole("ADMIN")

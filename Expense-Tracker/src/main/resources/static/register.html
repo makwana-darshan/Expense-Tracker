@@ -10,7 +10,6 @@
 		href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap"
 		rel="stylesheet" />
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
-	<script src="theme.js"></script>
 	<style>
 		:root {
 			--bg: #0d1117;
@@ -305,7 +304,7 @@
 			</form>
 
 			<div class="footer-text" style="margin-top:1.25rem;">
-				Already have an account? <a href="login.html">Login here</a>
+				Already have an account? <a href="/login">Login here</a>
 			</div>
 		</div>
 	</div>
@@ -360,7 +359,7 @@
 
 				if (res.ok && data.statusCode === 201) {
 					showSuccess();
-					setTimeout(() => window.location.href = 'login.html', 1500);
+					setTimeout(() => window.location.href = '/login', 1500);
 				} else {
 					showError(data.message || 'Something went wrong. Please try again.');
 				}
