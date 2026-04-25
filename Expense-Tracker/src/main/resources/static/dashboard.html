@@ -358,17 +358,19 @@
 			font-weight: 700;
 		}
 	</style>
-  <script src="theme.js"></script>
+	<script src="theme.js"></script>
 </head>
 
 <body>
 
 	<!-- Sidebar -->
 	<div class="sidebar">
-		<div class="sidebar-brand">
-			<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
-			<span>ExpenseTracker</span>
-		</div>
+		<a href="/dashboard" style="text-decoration:none;color:inherit;">
+			<div class="sidebar-brand">
+				<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+				<span>ExpenseTracker</span>
+			</div>
+		</a>
 		<ul class="nav flex-column" style="gap:2px;">
 			<li class="nav-item"><a href="/dashboard" class="nav-link active"><i class="bi bi-grid"></i>
 					Dashboard</a></li>
@@ -480,8 +482,10 @@
 		const BASE_URL = 'http://localhost:8080';
 
 		// Auth check
-		const user = JSON.parse(sessionStorage.getItem('user'));
-		if (!user) window.location.href = '/login';
+		const session = JSON.parse(sessionStorage.getItem('user'));
+		if (!session || !session.token) window.location.href = '/login';
+		const user = session.user;
+		const token = session.token;
 
 		// Set user info
 		document.getElementById('userName').textContent = user.fullName;
@@ -506,27 +510,28 @@
 			const now = new Date();
 			const month = now.getMonth() + 1;
 			const year = now.getFullYear();
+			const headers = {'Authorization': 'Bearer ' + token};
 
 			try {
 				// Total
-				const totalRes = await fetch(`${BASE_URL}/report/total/${userId}`);
+				const totalRes = await fetch(`${BASE_URL}/report/total/${userId}`, {headers});
 				const totalData = await totalRes.json();
 				document.getElementById('totalSpent').textContent = formatCurrency(totalData.data);
 
 				// Weekly
-				const weekRes = await fetch(`${BASE_URL}/report/weekly/${userId}`);
+				const weekRes = await fetch(`${BASE_URL}/report/weekly/${userId}`, {headers});
 				const weekData = await weekRes.json();
 				const weekTotal = (weekData.data || []).reduce((s, e) => s + parseFloat(e.amount), 0);
 				document.getElementById('weeklyTotal').textContent = formatCurrency(weekTotal);
 
 				// Monthly
-				const monthRes = await fetch(`${BASE_URL}/report/monthly/${userId}/${month}/${year}`);
+				const monthRes = await fetch(`${BASE_URL}/report/monthly/${userId}/${month}/${year}`, {headers});
 				const monthData = await monthRes.json();
 				const monthTotal = (monthData.data || []).reduce((s, e) => s + parseFloat(e.amount), 0);
 				document.getElementById('monthlyTotal').textContent = formatCurrency(monthTotal);
 
 				// All expenses
-				const allRes = await fetch(`${BASE_URL}/expense/getAll/${userId}`);
+				const allRes = await fetch(`${BASE_URL}/expense/getAll/${userId}`, {headers});
 				const allData = await allRes.json();
 				const expenses = allData.data || [];
 				document.getElementById('totalEntries').textContent = expenses.length;
@@ -558,9 +563,9 @@
 		}
 
 		loadDashboard();
-	  // ─── Theme toggle init
+		// ─── Theme toggle init
 		document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();
 	</script>
 </body>
 
-</html>
+</html>	

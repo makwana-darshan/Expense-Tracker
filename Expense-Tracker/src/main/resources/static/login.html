@@ -252,6 +252,94 @@
 			width: 1rem;
 			height: 1rem;
 		}
+
+		/* ── Email validation ── */
+		.field-hint {
+			font-size: 0.78rem;
+			margin-top: 5px;
+			display: none;
+			align-items: center;
+			gap: 5px;
+		}
+		.field-hint.show { display: flex; }
+		.field-hint.error { color: var(--danger); }
+		.field-hint.success { color: #3fb950; }
+		.form-control.input-error  { border-color: var(--danger) !important; box-shadow: 0 0 0 3px rgba(248,81,73,0.15) !important; }
+		.form-control.input-valid  { border-color: #3fb950 !important; box-shadow: 0 0 0 3px rgba(63,185,80,0.15) !important; }
+
+		.forgot-link {
+			font-size: 0.78rem;
+			color: var(--accent);
+			text-decoration: none;
+			font-weight: 600;
+			transition: opacity 0.2s;
+		}
+		.forgot-link:hover { opacity: 0.75; text-decoration: underline; }
+
+		/* ── Forgot Password Modal ── */
+		.modal-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0,0,0,0.65);
+			backdrop-filter: blur(4px);
+			z-index: 999;
+			align-items: center;
+			justify-content: center;
+		}
+		.modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+		.modal-box {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			padding: 2rem;
+			width: 100%;
+			max-width: 400px;
+			margin: 1rem;
+			animation: slideUp 0.25s ease;
+		}
+		@keyframes slideUp {
+			from { transform: translateY(20px); opacity: 0; }
+			to   { transform: translateY(0);    opacity: 1; }
+		}
+		.modal-box h6 {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 1rem;
+			margin-bottom: 0.4rem;
+		}
+		.modal-box p {
+			font-size: 0.83rem;
+			color: var(--muted);
+			margin-bottom: 1.25rem;
+		}
+		.modal-close {
+			position: absolute;
+			top: 1rem; right: 1rem;
+			background: none;
+			border: none;
+			color: var(--muted);
+			font-size: 1.1rem;
+			cursor: pointer;
+			line-height: 1;
+		}
+		.modal-close:hover { color: var(--text); }
+
+		.alert-success-custom {
+			background: rgba(0,229,160,0.1);
+			border: 1px solid rgba(0,229,160,0.3);
+			color: var(--accent);
+			border-radius: 10px;
+			font-size: 0.85rem;
+			padding: 0.65rem 1rem;
+			display: none;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 1rem;
+		}
+		.alert-success-custom.show { display: flex; }
 	</style>
   <script src="theme.js"></script>
 </head>
@@ -276,17 +364,21 @@
 				<div class="mb-3">
 					<label class="form-label">Email Address</label>
 					<input type="email" class="form-control" id="email" placeholder="darshan@gmail.com" required />
+				<div class="field-hint" id="emailHint"><i class="bi bi-info-circle"></i><span id="emailHintMsg"></span></div>
 				</div>
-				<div class="mb-4">
-					<label class="form-label">Password</label>
-					<div class="input-group">
+				<div class="mb-3">
+					<div class="d-flex justify-content-between align-items-center">
+						<label class="form-label mb-0">Password</label>
+						<a href="#" class="forgot-link" onclick="openForgotModal(event)">Forgot password?</a>
+					</div>
+					<div class="input-group mt-1">
 						<input type="password" class="form-control" id="password" placeholder="••••••••" required />
 						<span class="input-group-text" onclick="togglePassword()">
 							<i class="bi bi-eye" id="eyeIcon"></i>
 						</span>
 					</div>
 				</div>
-				<button type="submit" class="btn-accent" id="loginBtn">
+				<button type="submit" class="btn-accent mt-3" id="loginBtn">
 					<span id="btnText">Login</span>
 					<span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
 				</button>
@@ -302,6 +394,37 @@
 
 	<script>
 		const BASE_URL = 'http://localhost:8080';
+
+		const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+		function validateEmailField(inputId, hintId, hintMsgId) {
+			const input = document.getElementById(inputId);
+			const hint  = document.getElementById(hintId);
+			const msg   = document.getElementById(hintMsgId);
+			const val   = input.value.trim();
+			if (!val) {
+				input.classList.remove('input-error','input-valid');
+				hint.classList.remove('show','error','success');
+				return true; // empty — let required handle it
+			}
+			if (!EMAIL_RE.test(val)) {
+				input.classList.add('input-error'); input.classList.remove('input-valid');
+				hint.className = 'field-hint show error';
+				msg.textContent = 'Please enter a valid email address (e.g. name@example.com)';
+				return false;
+			}
+			input.classList.add('input-valid'); input.classList.remove('input-error');
+			hint.className = 'field-hint show success';
+			hint.querySelector('i').className = 'bi bi-check-circle';
+			msg.textContent = 'Looks good!';
+			return true;
+		}
+
+		document.getElementById('email').addEventListener('blur',  () => validateEmailField('email','emailHint','emailHintMsg'));
+		document.getElementById('email').addEventListener('input', () => {
+			if (document.getElementById('email').classList.contains('input-error'))
+				validateEmailField('email','emailHint','emailHintMsg');
+		});
 
 		function togglePassword() {
 			const pwd = document.getElementById('password');
@@ -328,6 +451,7 @@
 		document.getElementById('loginForm').addEventListener('submit', async function (e) {
 			e.preventDefault();
 			hideError();
+			if (!validateEmailField('email','emailHint','emailHintMsg')) return;
 
 			const btn = document.getElementById('loginBtn');
 			const btnText = document.getElementById('btnText');
@@ -352,7 +476,8 @@
 				if (res.ok && data.statusCode === 200) {
 					// Save user to sessionStorage
 					sessionStorage.setItem('user', JSON.stringify(data.data));
-					window.location.href = '/dashboard';
+					const role = data.data?.user?.role;
+					window.location.href = role === 'ADMIN' ? '/admin-dashboard' : '/dashboard';
 				} else {
 					showError(data.message || 'Invalid email or password');
 				}
@@ -365,6 +490,128 @@
 			}
 		});
 	</script>
+
+	<!-- ── Forgot Password Modal ── -->
+	<div class="modal-overlay" id="forgotModal" onclick="closeForgotOnOverlay(event)">
+		<div class="modal-box" style="position:relative;">
+			<button class="modal-close" onclick="closeForgotModal()"><i class="bi bi-x-lg"></i></button>
+
+			<div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;">
+				<div style="width:36px;height:36px;background:var(--accent-dim);border:1.5px solid var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1rem;">
+					<i class="bi bi-lock"></i>
+				</div>
+				<h6 class="mb-0">Forgot Password?</h6>
+			</div>
+			<p>Enter your registered email and we'll send you a password reset link.</p>
+
+			<div class="alert-success-custom" id="fpSuccess">
+				<i class="bi bi-check-circle"></i>
+				<span id="fpSuccessMsg">Reset link sent! Check your inbox.</span>
+			</div>
+			<div class="alert-custom" id="fpError">
+				<i class="bi bi-exclamation-circle"></i>
+				<span id="fpErrorMsg">Something went wrong.</span>
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Email Address</label>
+				<input type="email" class="form-control" id="fpEmail" placeholder="yourname@example.com" />
+				<div class="field-hint" id="fpEmailHint"><i class="bi bi-info-circle"></i><span id="fpEmailHintMsg"></span></div>
+			</div>
+
+			<button class="btn-accent" id="fpBtn" onclick="submitForgotPassword()">
+				<span id="fpBtnText">Send Reset Link</span>
+				<span id="fpSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+			</button>
+
+			<div style="text-align:center;margin-top:1rem;">
+				<a href="#" class="forgot-link" onclick="closeForgotModal(); return false;">Back to Login</a>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function openForgotModal(e) {
+			e.preventDefault();
+			document.getElementById('fpEmail').value = '';
+			document.getElementById('fpSuccess').classList.remove('show');
+			document.getElementById('fpError').classList.remove('show');
+			document.getElementById('fpBtnText').textContent = 'Send Reset Link';
+			document.getElementById('fpBtn').disabled = false;
+			document.getElementById('forgotModal').classList.add('open');
+			setTimeout(() => document.getElementById('fpEmail').focus(), 100);
+		}
+
+		function closeForgotModal() {
+			document.getElementById('forgotModal').classList.remove('open');
+		}
+
+		function closeForgotOnOverlay(e) {
+			if (e.target === document.getElementById('forgotModal')) closeForgotModal();
+		}
+
+		async function submitForgotPassword() {
+			const email = document.getElementById('fpEmail').value.trim();
+			const btn = document.getElementById('fpBtn');
+			const btnText = document.getElementById('fpBtnText');
+			const spinner = document.getElementById('fpSpinner');
+			const successEl = document.getElementById('fpSuccess');
+			const errorEl = document.getElementById('fpError');
+
+			successEl.classList.remove('show');
+			errorEl.classList.remove('show');
+
+			if (!email) {
+				document.getElementById('fpErrorMsg').textContent = 'Please enter your email address.';
+				errorEl.classList.add('show');
+				return;
+			}
+			if (!validateEmailField('fpEmail','fpEmailHint','fpEmailHintMsg')) return;
+
+			btn.disabled = true;
+			btnText.textContent = 'Sending...';
+			spinner.classList.remove('d-none');
+
+			try {
+				const res = await fetch(`${BASE_URL}/user/forgot-password`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email })
+				});
+				const data = await res.json();
+				if (res.ok) {
+					document.getElementById('fpSuccessMsg').textContent = data.message || 'Reset link sent! Check your inbox.';
+					successEl.classList.add('show');
+					btnText.textContent = 'Link Sent ✓';
+				} else {
+					document.getElementById('fpErrorMsg').textContent = data.message || 'No account found with this email.';
+					errorEl.classList.add('show');
+					btn.disabled = false;
+					btnText.textContent = 'Send Reset Link';
+				}
+			} catch (err) {
+				document.getElementById('fpErrorMsg').textContent = 'Server error. Please try again.';
+				errorEl.classList.add('show');
+				btn.disabled = false;
+				btnText.textContent = 'Send Reset Link';
+			} finally {
+				spinner.classList.add('d-none');
+			}
+		}
+
+		// Allow pressing Enter in the email field
+		document.addEventListener('DOMContentLoaded', () => {
+			document.getElementById('fpEmail').addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') submitForgotPassword();
+			});
+			document.getElementById('fpEmail').addEventListener('blur',  () => validateEmailField('fpEmail','fpEmailHint','fpEmailHintMsg'));
+			document.getElementById('fpEmail').addEventListener('input', () => {
+				if (document.getElementById('fpEmail').classList.contains('input-error'))
+					validateEmailField('fpEmail','fpEmailHint','fpEmailHintMsg');
+			});
+		});
+	</script>
+
   <!-- Theme toggle (fixed top-right) -->
 	<div id="themeToggleWrap" style="position:fixed;top:1rem;right:1rem;z-index:9999;"></div>
 	<script>document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();</script>

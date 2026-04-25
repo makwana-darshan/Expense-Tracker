@@ -466,15 +466,18 @@
 			color: var(--muted);
 		}
 	</style>
-  <script src="theme.js"></script>
+	<script src="theme.js"></script>
 </head>
 
 <body>
 	<div class="sidebar">
-		<div class="sidebar-brand">
-			<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
-			<span>ExpenseTracker</span>
-		</div>
+		<a href="/" style="text-decoration:none;color:inherit;"><a href="/dashboard"
+				style="text-decoration:none;color:inherit;">
+				<div class="sidebar-brand">
+					<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+					<span>ExpenseTracker</span>
+				</div>
+			</a></a>
 		<ul class="nav flex-column" style="gap:2px;">
 			<li class="nav-item"><a href="/dashboard" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a></li>
 			<li class="nav-item"><a href="/add-expense" class="nav-link"><i class="bi bi-plus-circle"></i> Add
@@ -604,8 +607,10 @@
 
 	<script>
 		const BASE_URL = 'http://localhost:8080';
-		const user = JSON.parse(sessionStorage.getItem('user'));
-		if (!user) window.location.href = '/login';
+		const session = JSON.parse(sessionStorage.getItem('user'));
+		if (!session) window.location.href = '/login';
+		const user = session.user;
+		const token = session.token;
 
 		document.getElementById('userName').textContent = user.fullName;
 		document.getElementById('userRole').textContent = user.role || 'USER';
@@ -658,7 +663,7 @@
 
 		async function loadWeekly() {
 			try {
-				const res = await fetch(`${BASE_URL}/report/weekly/${user.id}`);
+				const res = await fetch(`${BASE_URL}/report/weekly/${user.id}`, {headers: {'Authorization': 'Bearer ' + token}});
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('weeklyTotal').textContent = formatCurrency(calcTotal(expenses));
@@ -670,7 +675,7 @@
 			const month = document.getElementById('monthSelect').value;
 			const year = document.getElementById('monthYearSelect').value;
 			try {
-				const res = await fetch(`${BASE_URL}/report/monthly/${user.id}/${month}/${year}`);
+				const res = await fetch(`${BASE_URL}/report/monthly/${user.id}/${month}/${year}`, {headers: {'Authorization': 'Bearer ' + token}});
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('monthlyTotal').textContent = formatCurrency(calcTotal(expenses));
@@ -681,7 +686,7 @@
 		async function loadYearly() {
 			const year = document.getElementById('yearSelect').value;
 			try {
-				const res = await fetch(`${BASE_URL}/report/yearly/${user.id}/${year}`);
+				const res = await fetch(`${BASE_URL}/report/yearly/${user.id}/${year}`, {headers: {'Authorization': 'Bearer ' + token}});
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('yearlyTotal').textContent = formatCurrency(calcTotal(expenses));
@@ -692,7 +697,7 @@
 		async function loadCategory() {
 			const cat = document.getElementById('catSelect').value;
 			try {
-				const res = await fetch(`${BASE_URL}/report/category/${user.id}/${cat}`);
+				const res = await fetch(`${BASE_URL}/report/category/${user.id}/${cat}`, {headers: {'Authorization': 'Bearer ' + token}});
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('categoryTotal').textContent = formatCurrency(calcTotal(expenses));
@@ -713,9 +718,10 @@
 
 		function logout() {sessionStorage.clear(); window.location.href = '/login';}
 		loadWeekly();
-	  // ─── Theme toggle init
+		// ─── Theme toggle init
 		document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();
 	</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

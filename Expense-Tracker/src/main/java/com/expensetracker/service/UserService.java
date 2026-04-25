@@ -54,6 +54,7 @@ public class UserService {
 			throw new DuplicateEmailException("User with email '" + user.getEmail() + "' already exists");
 		}
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		// Always force USER role — ADMIN is created only via AdminInitializer
 		user.setRole(Roles.USER);
 
 		ResponseStructure<User> response = new ResponseStructure<>();

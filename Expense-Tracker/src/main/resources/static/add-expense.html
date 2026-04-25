@@ -378,15 +378,17 @@
 			height: 1rem;
 		}
 	</style>
-  <script src="theme.js"></script>
+	<script src="theme.js"></script>
 </head>
 
 <body>
 	<div class="sidebar">
-		<div class="sidebar-brand">
-			<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
-			<span>ExpenseTracker</span>
-		</div>
+		<a href="/dashboard" style="text-decoration:none;color:inherit;">
+			<div class="sidebar-brand">
+				<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+				<span>ExpenseTracker</span>
+			</div>
+		</a>
 		<ul class="nav flex-column" style="gap:2px;">
 			<li class="nav-item"><a href="/dashboard" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a></li>
 			<li class="nav-item"><a href="/add-expense" class="nav-link active"><i class="bi bi-plus-circle"></i>
@@ -505,8 +507,10 @@
 
 	<script>
 		const BASE_URL = 'http://localhost:8080';
-		const user = JSON.parse(sessionStorage.getItem('user'));
-		if (!user) window.location.href = '/login';
+		const session = JSON.parse(sessionStorage.getItem('user'));
+		if (!session || !session.token) window.location.href = '/login';
+		const user = session.user;
+		const token = session.token;
 
 		document.getElementById('userName').textContent = user.fullName;
 		document.getElementById('userRole').textContent = user.role || 'USER';
@@ -558,7 +562,7 @@
 			try {
 				const res = await fetch(`${BASE_URL}/expense/save/${user.id}`, {
 					method: 'POST',
-					headers: {'Content-Type': 'application/json'},
+					headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
 					body: JSON.stringify(payload)
 				});
 				const data = await res.json();
@@ -590,7 +594,7 @@
 			document.getElementById('successAlert').classList.remove('show');
 		}
 		function logout() {sessionStorage.clear(); window.location.href = '/login';}
-	  // ─── Theme toggle init
+		// ─── Theme toggle init
 		document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();
 	</script>
 </body>

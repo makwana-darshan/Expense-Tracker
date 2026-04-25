@@ -247,6 +247,20 @@
 			width: 1rem;
 			height: 1rem;
 		}
+
+		/* ── Email validation ── */
+		.field-hint {
+			font-size: 0.78rem;
+			margin-top: 5px;
+			display: none;
+			align-items: center;
+			gap: 5px;
+		}
+		.field-hint.show { display: flex; }
+		.field-hint.error { color: var(--danger); }
+		.field-hint.success { color: var(--success); }
+		.form-control.input-error { border-color: var(--danger) !important; box-shadow: 0 0 0 3px rgba(248,81,73,0.15) !important; }
+		.form-control.input-valid { border-color: var(--success) !important; box-shadow: 0 0 0 3px rgba(63,185,80,0.15) !important; }
 	</style>
 	<script src="theme.js"></script>
 </head>
@@ -279,8 +293,9 @@
 				<div class="mb-3">
 					<label class="form-label">Email Address</label>
 					<input type="email" class="form-control" id="email" placeholder="darshan@gmail.com" required />
+				<div class="field-hint" id="emailHint"><i class="bi bi-info-circle"></i><span id="emailHintMsg"></span></div>
 				</div>
-				<div class="mb-3">
+				<div class="mb-4">
 					<label class="form-label">Password</label>
 					<div class="input-group">
 						<input type="password" class="form-control" id="password" placeholder="Min 6 characters"
@@ -289,13 +304,6 @@
 							<i class="bi bi-eye" id="eyeIcon"></i>
 						</span>
 					</div>
-				</div>
-				<div class="mb-4">
-					<label class="form-label">Role</label>
-					<select class="form-select" id="role">
-						<option value="USER">User</option>
-						<option value="ADMIN">Admin</option>
-					</select>
 				</div>
 				<button type="submit" class="btn-accent" id="registerBtn">
 					<span id="btnText">Create Account</span>
@@ -311,6 +319,38 @@
 
 	<script>
 		const BASE_URL = 'http://localhost:8080';
+
+		const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+		function validateEmailField(inputId, hintId, hintMsgId) {
+			const input = document.getElementById(inputId);
+			const hint  = document.getElementById(hintId);
+			const msg   = document.getElementById(hintMsgId);
+			const val   = input.value.trim();
+			if (!val) {
+				input.classList.remove('input-error','input-valid');
+				hint.classList.remove('show','error','success');
+				return true;
+			}
+			if (!EMAIL_RE.test(val)) {
+				input.classList.add('input-error'); input.classList.remove('input-valid');
+				hint.className = 'field-hint show error';
+				hint.querySelector('i').className = 'bi bi-info-circle';
+				msg.textContent = 'Please enter a valid email address (e.g. name@example.com)';
+				return false;
+			}
+			input.classList.add('input-valid'); input.classList.remove('input-error');
+			hint.className = 'field-hint show success';
+			hint.querySelector('i').className = 'bi bi-check-circle';
+			msg.textContent = 'Looks good!';
+			return true;
+		}
+
+		document.getElementById('email').addEventListener('blur',  () => validateEmailField('email','emailHint','emailHintMsg'));
+		document.getElementById('email').addEventListener('input', () => {
+			if (document.getElementById('email').classList.contains('input-error'))
+				validateEmailField('email','emailHint','emailHintMsg');
+		});
 
 		function togglePassword() {
 			const pwd = document.getElementById('password');
@@ -332,6 +372,7 @@
 
 		document.getElementById('registerForm').addEventListener('submit', async function (e) {
 			e.preventDefault();
+			if (!validateEmailField('email','emailHint','emailHintMsg')) return;
 
 			const btn = document.getElementById('registerBtn');
 			const btnText = document.getElementById('btnText');
@@ -344,8 +385,7 @@
 			const payload = {
 				fullName: document.getElementById('fullName').value,
 				email: document.getElementById('email').value,
-				password: document.getElementById('password').value,
-				role: document.getElementById('role').value
+				password: document.getElementById('password').value
 			};
 
 			try {

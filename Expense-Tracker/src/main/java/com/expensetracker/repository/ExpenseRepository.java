@@ -46,7 +46,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	List<Expense> getExpenseByYear(@Param("userId") Long userId, @Param("year") int year);
 
 	@Query("SELECT e FROM Expense e WHERE e.user.id = :userId AND e.category = :category")
-	List<Expense> getExpenseByCategory(@Param("userId") Long userId, @Param("category") String category);
+	List<Expense> getExpenseByCategory(@Param("userId") Long userId,
+			@Param("category") com.expensetracker.enums.Categories category);
 
 	// ─── Dashboard chart queries ───────────────────────────────────────────────
 

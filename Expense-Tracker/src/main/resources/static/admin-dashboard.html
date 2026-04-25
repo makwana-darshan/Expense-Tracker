@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Admin Dashboard | ExpenseTracker</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap"
+		rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<style>
+		:root {
+			--bg: #0d1117;
+			--card: #161b22;
+			--border: #30363d;
+			--accent: #00e5a0;
+			--accent-dim: rgba(0, 229, 160, 0.12);
+			--text: #e6edf3;
+			--muted: #8b949e;
+			--danger: #f85149;
+			--warning: #e3b341;
+			--info: #388bfd;
+			--success: #3fb950;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg);
+			font-family: 'Nunito', sans-serif;
+			color: var(--text);
+		}
+
+		/* ── Sidebar ── */
+		.sidebar {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 240px;
+			height: 100vh;
+			background: var(--card);
+			border-right: 1px solid var(--border);
+			display: flex;
+			flex-direction: column;
+			padding: 1.5rem 1rem;
+			z-index: 100;
+		}
+
+		.sidebar-brand {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0 0.5rem 1.5rem;
+			border-bottom: 1px solid var(--border);
+			margin-bottom: 1.5rem;
+		}
+
+		.sidebar-brand-icon {
+			width: 36px;
+			height: 36px;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			border-radius: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--accent);
+			font-size: 1rem;
+			flex-shrink: 0;
+		}
+
+		.sidebar-brand-text {
+			display: flex;
+			flex-direction: column;
+			gap: 3px;
+		}
+
+		.sidebar-brand-text span {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.95rem;
+			white-space: nowrap;
+		}
+
+		.admin-badge {
+			font-size: 0.6rem;
+			font-weight: 700;
+			background: rgba(248, 81, 73, 0.15);
+			border: 1px solid rgba(248, 81, 73, 0.3);
+			color: var(--danger);
+			padding: 1px 7px;
+			border-radius: 20px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			width: fit-content;
+		}
+
+		.nav-item {
+			list-style: none;
+			margin-bottom: 4px;
+		}
+
+		.nav-link {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			color: var(--muted);
+			text-decoration: none;
+			font-size: 0.88rem;
+			font-weight: 600;
+			transition: all 0.2s;
+		}
+
+		.nav-link:hover {
+			background: var(--accent-dim);
+			color: var(--text);
+		}
+
+		.nav-link.active {
+			background: var(--accent-dim);
+			color: var(--accent);
+			border: 1px solid rgba(0, 229, 160, 0.2);
+		}
+
+		.nav-link i {
+			font-size: 1rem;
+			width: 18px;
+			text-align: center;
+		}
+
+		.sidebar-footer {
+			margin-top: auto;
+			border-top: 1px solid var(--border);
+			padding-top: 1rem;
+		}
+
+		.user-info {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 0.5rem 0.75rem;
+		}
+
+		.user-avatar {
+			width: 32px;
+			height: 32px;
+			background: var(--accent-dim);
+			border: 1.5px solid var(--accent);
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 0.75rem;
+			font-weight: 700;
+			color: var(--accent);
+		}
+
+		.user-info-text .name {
+			font-size: 0.82rem;
+			font-weight: 700;
+		}
+
+		.user-info-text .role-tag {
+			font-size: 0.7rem;
+			color: var(--danger);
+			font-weight: 600;
+		}
+
+		/* ── Main ── */
+		.main {
+			margin-left: 240px;
+			padding: 2rem;
+			min-height: 100vh;
+		}
+
+		.page-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 2rem;
+		}
+
+		.page-title {
+			font-family: 'Sora', sans-serif;
+			font-size: 1.4rem;
+			font-weight: 800;
+		}
+
+		.page-title span {
+			color: var(--accent);
+		}
+
+		/* ── Stat cards ── */
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1rem;
+			margin-bottom: 2rem;
+		}
+
+		.stat-card {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			padding: 1.25rem;
+		}
+
+		.stat-card .label {
+			font-size: 0.75rem;
+			color: var(--muted);
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 0.5rem;
+		}
+
+		.stat-card .value {
+			font-family: 'Sora', sans-serif;
+			font-size: 1.6rem;
+			font-weight: 800;
+		}
+
+		.stat-card .icon {
+			font-size: 1.4rem;
+			margin-bottom: 0.75rem;
+		}
+
+		/* ── Section card ── */
+		.section-card {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			padding: 1.5rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.section-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 1.25rem;
+		}
+
+		.section-title {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 1rem;
+		}
+
+		/* ── Table ── */
+		.table-wrap {
+			overflow-x: auto;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 0.85rem;
+		}
+
+		th {
+			color: var(--muted);
+			font-weight: 600;
+			font-size: 0.75rem;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			padding: 0.6rem 1rem;
+			text-align: left;
+			border-bottom: 1px solid var(--border);
+		}
+
+		td {
+			padding: 0.75rem 1rem;
+			border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+			vertical-align: middle;
+		}
+
+		tr:last-child td {
+			border-bottom: none;
+		}
+
+		tr:hover td {
+			background: rgba(255, 255, 255, 0.02);
+		}
+
+		.badge-role {
+			font-size: 0.7rem;
+			font-weight: 700;
+			padding: 3px 8px;
+			border-radius: 20px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.badge-admin {
+			background: rgba(248, 81, 73, 0.15);
+			color: var(--danger);
+			border: 1px solid rgba(248, 81, 73, 0.3);
+		}
+
+		.badge-user {
+			background: rgba(0, 229, 160, 0.12);
+			color: var(--accent);
+			border: 1px solid rgba(0, 229, 160, 0.2);
+		}
+
+		.badge-category {
+			font-size: 0.72rem;
+			font-weight: 600;
+			padding: 3px 8px;
+			border-radius: 6px;
+			background: rgba(56, 139, 253, 0.12);
+			color: var(--info);
+			border: 1px solid rgba(56, 139, 253, 0.2);
+		}
+
+		/* ── Buttons ── */
+		.btn-sm-danger {
+			background: rgba(248, 81, 73, 0.1);
+			border: 1px solid rgba(248, 81, 73, 0.3);
+			color: var(--danger);
+			border-radius: 7px;
+			padding: 4px 10px;
+			font-size: 0.78rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.btn-sm-danger:hover {
+			background: rgba(248, 81, 73, 0.2);
+		}
+
+		.btn-sm-accent {
+			background: var(--accent-dim);
+			border: 1px solid rgba(0, 229, 160, 0.2);
+			color: var(--accent);
+			border-radius: 7px;
+			padding: 4px 10px;
+			font-size: 0.78rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.btn-sm-accent:hover {
+			background: rgba(0, 229, 160, 0.2);
+		}
+
+		.btn-icon {
+			background: none;
+			border: 1px solid var(--border);
+			color: var(--muted);
+			border-radius: 7px;
+			padding: 4px 8px;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.btn-icon:hover {
+			color: var(--accent);
+			border-color: var(--accent);
+		}
+
+		/* ── Search / Filter bar ── */
+		.filter-bar {
+			display: flex;
+			gap: 0.75rem;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+
+		.search-input {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			color: var(--text);
+			border-radius: 9px;
+			padding: 0.5rem 0.75rem;
+			font-family: 'Nunito', sans-serif;
+			font-size: 0.85rem;
+			min-width: 200px;
+		}
+
+		.search-input:focus {
+			outline: none;
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px rgba(0, 229, 160, 0.1);
+		}
+
+		.search-input::placeholder {
+			color: var(--muted);
+		}
+
+		/* ── Modal overlay ── */
+		.modal-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.65);
+			backdrop-filter: blur(4px);
+			z-index: 999;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.modal-overlay.open {
+			display: flex;
+		}
+
+		.modal-box {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			padding: 2rem;
+			width: 100%;
+			max-width: 400px;
+			margin: 1rem;
+			position: relative;
+		}
+
+		.modal-box h6 {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			margin-bottom: 1rem;
+		}
+
+		.modal-close {
+			position: absolute;
+			top: 1rem;
+			right: 1rem;
+			background: none;
+			border: none;
+			color: var(--muted);
+			font-size: 1.1rem;
+			cursor: pointer;
+		}
+
+		.modal-close:hover {
+			color: var(--text);
+		}
+
+		.form-label {
+			font-size: 0.78rem;
+			font-weight: 600;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 5px;
+		}
+
+		.form-select {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			color: var(--text);
+			border-radius: 9px;
+			padding: 0.55rem 0.75rem;
+			font-family: 'Nunito', sans-serif;
+			font-size: 0.88rem;
+			width: 100%;
+		}
+
+		.form-select:focus {
+			outline: none;
+			border-color: var(--accent);
+		}
+
+		.form-select option {
+			background: var(--card);
+		}
+
+		.btn-primary-full {
+			background: var(--accent);
+			border: none;
+			color: #0d1117;
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.9rem;
+			padding: 0.65rem;
+			border-radius: 10px;
+			width: 100%;
+			cursor: pointer;
+			transition: opacity 0.2s;
+		}
+
+		.btn-primary-full:hover {
+			opacity: 0.85;
+		}
+
+		/* ── Toast ── */
+		.toast-container {
+			position: fixed;
+			bottom: 1.5rem;
+			right: 1.5rem;
+			z-index: 9999;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.toast {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 10px;
+			padding: 0.75rem 1rem;
+			font-size: 0.85rem;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			animation: slideIn 0.3s ease;
+			min-width: 250px;
+		}
+
+		@keyframes slideIn {
+			from {
+				opacity: 0;
+				transform: translateX(30px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateX(0);
+			}
+		}
+
+		.toast.success {
+			border-color: rgba(63, 185, 80, 0.4);
+			color: var(--success);
+		}
+
+		.toast.error {
+			border-color: rgba(248, 81, 73, 0.4);
+			color: var(--danger);
+		}
+
+		/* ── Empty state ── */
+		.empty-state {
+			text-align: center;
+			padding: 2.5rem 1rem;
+			color: var(--muted);
+		}
+
+		.empty-state i {
+			font-size: 2rem;
+			margin-bottom: 0.5rem;
+			display: block;
+		}
+
+		.empty-state p {
+			font-size: 0.85rem;
+		}
+
+		/* ── Loading skeleton ── */
+		.skeleton {
+			background: linear-gradient(90deg, var(--border) 25%, rgba(48, 54, 61, 0.8) 50%, var(--border) 75%);
+			background-size: 200% 100%;
+			animation: shimmer 1.4s infinite;
+			border-radius: 6px;
+			height: 16px;
+		}
+
+		@keyframes shimmer {
+			0% {
+				background-position: 200% 0;
+			}
+
+			100% {
+				background-position: -200% 0;
+			}
+		}
+
+		.logout-btn {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 0.6rem 0.75rem;
+			border-radius: 10px;
+			color: var(--danger);
+			text-decoration: none;
+			font-size: 0.88rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+			background: none;
+			border: none;
+			width: 100%;
+		}
+
+		.logout-btn:hover {
+			background: rgba(248, 81, 73, 0.1);
+		}
+
+		@media (max-width: 900px) {
+			.stats-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.sidebar {
+				display: none;
+			}
+
+			.main {
+				margin-left: 0;
+				padding: 1rem;
+			}
+		}
+	</style>
+	<script src="theme.js"></script>
+</head>
+
+<body>
+
+	<!-- ── Sidebar ── -->
+	<aside class="sidebar">
+		<div class="sidebar-brand">
+			<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+			<div class="sidebar-brand-text">
+				<span>ExpenseTracker</span>
+				<span class="admin-badge">Admin Panel</span>
+			</div>
+		</div>
+
+		<ul style="list-style:none;padding:0;margin:0;flex:1;">
+			<li class="nav-item">
+				<a class="nav-link active" href="#" onclick="showSection('overview', this)">
+					<i class="bi bi-grid-1x2"></i> Overview
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" onclick="showSection('users', this)">
+					<i class="bi bi-people"></i> Manage Users
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" onclick="showSection('expenses', this)">
+					<i class="bi bi-receipt"></i> All Expenses
+				</a>
+			</li>
+		</ul>
+
+		<div class="sidebar-footer">
+			<div class="user-info">
+				<div class="user-avatar" id="sidebarAvatar">A</div>
+				<div class="user-info-text">
+					<div class="name" id="sidebarName">Admin</div>
+					<div class="role-tag">Administrator</div>
+				</div>
+			</div>
+			<button class="logout-btn" onclick="logout()">
+				<i class="bi bi-box-arrow-right"></i> Logout
+			</button>
+		</div>
+	</aside>
+
+	<!-- ── Main Content ── -->
+	<main class="main">
+
+		<!-- Overview Section -->
+		<div id="sectionOverview">
+			<div class="page-header">
+				<div>
+					<div class="page-title">Admin <span>Dashboard</span></div>
+					<div style="font-size:0.83rem;color:var(--muted);margin-top:3px;">Welcome back, <span
+							id="headerName">Admin</span></div>
+				</div>
+			</div>
+
+			<div class="stats-grid">
+				<div class="stat-card">
+					<div class="icon" style="color:var(--info)"><i class="bi bi-people-fill"></i></div>
+					<div class="label">Total Users</div>
+					<div class="value" id="statUsers">—</div>
+				</div>
+				<div class="stat-card">
+					<div class="icon" style="color:var(--accent)"><i class="bi bi-receipt-cutoff"></i></div>
+					<div class="label">Total Expenses</div>
+					<div class="value" id="statExpenses">—</div>
+				</div>
+				<div class="stat-card">
+					<div class="icon" style="color:var(--warning)"><i class="bi bi-currency-rupee"></i></div>
+					<div class="label">Total Amount</div>
+					<div class="value" id="statAmount">—</div>
+				</div>
+				<div class="stat-card">
+					<div class="icon" style="color:var(--danger)"><i class="bi bi-shield-fill"></i></div>
+					<div class="label">Admins</div>
+					<div class="value" id="statAdmins">—</div>
+				</div>
+			</div>
+
+			<!-- Recent Users -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title"><i class="bi bi-people"
+							style="color:var(--info);margin-right:6px;"></i>Recent Users</div>
+					<button class="btn-sm-accent" onclick="showSection('users')">View All</button>
+				</div>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Email</th>
+								<th>Role</th>
+								<th>Joined</th>
+							</tr>
+						</thead>
+						<tbody id="recentUsersTable">
+							<tr>
+								<td colspan="4">
+									<div class="skeleton" style="margin:8px 0;"></div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Users Section -->
+		<div id="sectionUsers" style="display:none;">
+			<div class="page-header">
+				<div class="page-title">Manage <span>Users</span></div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title"><i class="bi bi-people"
+							style="color:var(--info);margin-right:6px;"></i>All Users</div>
+					<div class="filter-bar">
+						<input class="search-input" id="userSearch" placeholder="🔍 Search by name or email..."
+							oninput="filterUsers()" />
+					</div>
+				</div>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Name</th>
+								<th>Email</th>
+								<th>Phone</th>
+								<th>Role</th>
+								<th>Joined</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody id="usersTable">
+							<tr>
+								<td colspan="7">
+									<div class="skeleton" style="margin:8px 0;"></div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Expenses Section -->
+		<div id="sectionExpenses" style="display:none;">
+			<div class="page-header">
+				<div class="page-title">All <span>Expenses</span></div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title"><i class="bi bi-receipt"
+							style="color:var(--accent);margin-right:6px;"></i>All User Expenses</div>
+					<div class="filter-bar">
+						<input class="search-input" id="expenseSearch" placeholder="🔍 Search by title or user..."
+							oninput="filterExpenses()" />
+						<input type="date" class="search-input" id="expStartDate" style="min-width:140px;" />
+						<input type="date" class="search-input" id="expEndDate" style="min-width:140px;" />
+						<button class="btn-sm-accent" onclick="loadExpensesByDate()">Filter</button>
+						<button class="btn-icon" onclick="loadAllExpenses()" title="Reset"><i
+								class="bi bi-arrow-counterclockwise"></i></button>
+					</div>
+				</div>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Title</th>
+								<th>User</th>
+								<th>Category</th>
+								<th>Amount</th>
+								<th>Payment</th>
+								<th>Date</th>
+							</tr>
+						</thead>
+						<tbody id="expensesTable">
+							<tr>
+								<td colspan="7">
+									<div class="skeleton" style="margin:8px 0;"></div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div style="margin-top:1rem;font-size:0.82rem;color:var(--muted);text-align:right;">
+					Total: <strong id="expensesTotal" style="color:var(--accent);">₹0</strong>
+				</div>
+			</div>
+		</div>
+
+	</main>
+
+	<!-- ── Change Role Modal ── -->
+	<div class="modal-overlay" id="roleModal" onclick="closeRoleModalOverlay(event)">
+		<div class="modal-box">
+			<button class="modal-close" onclick="closeRoleModal()"><i class="bi bi-x-lg"></i></button>
+			<h6>Change User Role</h6>
+			<p style="font-size:0.83rem;color:var(--muted);margin-bottom:1rem;">
+				Changing role for: <strong id="roleModalName" style="color:var(--text);"></strong>
+			</p>
+			<div class="mb-3">
+				<label class="form-label">New Role</label>
+				<select class="form-select" id="roleSelect">
+					<option value="USER">USER</option>
+					<option value="ADMIN">ADMIN</option>
+				</select>
+			</div>
+			<button class="btn-primary-full" onclick="confirmRoleChange()">Update Role</button>
+		</div>
+	</div>
+
+	<!-- ── Delete Confirm Modal ── -->
+	<div class="modal-overlay" id="deleteModal" onclick="closeDeleteModalOverlay(event)">
+		<div class="modal-box">
+			<button class="modal-close" onclick="closeDeleteModal()"><i class="bi bi-x-lg"></i></button>
+			<div style="text-align:center;padding:0.5rem 0;">
+				<i class="bi bi-exclamation-triangle"
+					style="font-size:2rem;color:var(--danger);margin-bottom:1rem;display:block;"></i>
+				<h6 style="margin-bottom:0.5rem;">Delete User?</h6>
+				<p style="font-size:0.83rem;color:var(--muted);margin-bottom:1.5rem;">
+					This will permanently delete <strong id="deleteModalName" style="color:var(--text);"></strong> and
+					all their expenses.
+				</p>
+				<div style="display:flex;gap:0.75rem;">
+					<button class="btn-primary-full" style="background:var(--border);color:var(--text);"
+						onclick="closeDeleteModal()">Cancel</button>
+					<button class="btn-primary-full" style="background:var(--danger);"
+						onclick="confirmDelete()">Delete</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ── Toast Container ── -->
+	<div class="toast-container" id="toastContainer"></div>
+
+	<script>
+		const BASE_URL = 'http://localhost:8080';
+		let allUsers = [];
+		let allExpenses = [];
+		let selectedUserId = null;
+		let selectedUserName = null;
+
+		// ── Auth guard ────────────────────────────────────────────────────────
+		const session = JSON.parse(sessionStorage.getItem('user') || 'null');
+		if (!session || !session.token || session.user?.role !== 'ADMIN') {
+			window.location.href = '/login';
+		}
+
+		const token = session?.token;
+		const adminUser = session?.user;
+
+		// Set admin name in sidebar
+		document.getElementById('sidebarName').textContent = adminUser?.fullName || 'Admin';
+		document.getElementById('headerName').textContent = adminUser?.fullName?.split(' ')[0] || 'Admin';
+		document.getElementById('sidebarAvatar').textContent = (adminUser?.fullName || 'A')[0].toUpperCase();
+
+		// ── Section navigation ────────────────────────────────────────────────
+		function showSection(name, el) {
+			['overview', 'users', 'expenses'].forEach(s => {
+				document.getElementById('section' + s.charAt(0).toUpperCase() + s.slice(1)).style.display = s === name ? 'block' : 'none';
+			});
+			document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+			if (el) el.classList.add('active');
+
+			if (name === 'users') loadUsers();
+			if (name === 'expenses') loadAllExpenses();
+		}
+
+		// ── API helper ────────────────────────────────────────────────────────
+		async function apiFetch(url, options = {}) {
+			const res = await fetch(BASE_URL + url, {
+				...options,
+				headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, ...(options.headers || {})}
+			});
+			return res;
+		}
+
+		// ── Load overview ─────────────────────────────────────────────────────
+		async function loadOverview() {
+			try {
+				const res = await apiFetch('/admin/users');
+				if (!res.ok) {
+					const err = await res.json();
+					console.error('Failed to load users:', res.status, err);
+					document.getElementById('recentUsersTable').innerHTML = `<tr><td colspan="4" style="color:var(--danger);padding:1rem;">Error ${res.status}: ${err.message || 'Failed to load users'}</td></tr>`;
+					return;
+				}
+				const data = await res.json();
+				allUsers = data.data || [];
+
+				document.getElementById('statUsers').textContent = allUsers.length;
+				document.getElementById('statAdmins').textContent = allUsers.filter(u => u.role === 'ADMIN').length;
+
+				const recent = [...allUsers].reverse().slice(0, 5);
+				document.getElementById('recentUsersTable').innerHTML = recent.length ? recent.map(u => `
+					<tr>
+						<td><strong>${u.fullName}</strong></td>
+						<td style="color:var(--muted);">${u.email}</td>
+						<td><span class="badge-role ${u.role === 'ADMIN' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td>
+						<td style="color:var(--muted);">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN') : '—'}</td>
+					</tr>
+				`).join('') : '<tr><td colspan="4" class="empty-state"><i class="bi bi-people"></i><p>No users found</p></td></tr>';
+
+			} catch (e) {
+				console.error('loadOverview users error:', e);
+				document.getElementById('recentUsersTable').innerHTML = '<tr><td colspan="4" style="color:var(--danger);padding:1rem;">Failed to load users. Check console.</td></tr>';
+			}
+
+			try {
+				const res = await apiFetch('/expense/getAll');
+				if (!res.ok) {
+					console.error('Failed to load expenses:', res.status);
+					document.getElementById('statExpenses').textContent = '—';
+					document.getElementById('statAmount').textContent = '—';
+					return;
+				}
+				const data = await res.json();
+				allExpenses = data.data || [];
+				document.getElementById('statExpenses').textContent = allExpenses.length;
+				const total = allExpenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+				document.getElementById('statAmount').textContent = '₹' + total.toLocaleString('en-IN', {maximumFractionDigits: 0});
+			} catch (e) {
+				console.error('loadOverview expenses error:', e);
+				document.getElementById('statExpenses').textContent = '—';
+				document.getElementById('statAmount').textContent = '—';
+			}
+		}
+
+		// ── Load all users ─────────────────────────────────────────────────────
+		async function loadUsers() {
+			document.getElementById('usersTable').innerHTML = '<tr><td colspan="7"><div class="skeleton" style="margin:8px 0;height:20px;"></div></td></tr>';
+			try {
+				const res = await apiFetch('/admin/users');
+				if (!res.ok) {
+					const err = await res.json();
+					console.error('loadUsers error:', res.status, err);
+					document.getElementById('usersTable').innerHTML = `<tr><td colspan="7" style="color:var(--danger);padding:1rem;">Error ${res.status}: ${err.message || 'Failed to load users'}</td></tr>`;
+					return;
+				}
+				const data = await res.json();
+				allUsers = data.data || [];
+				renderUsersTable(allUsers);
+			} catch (e) {
+				console.error('loadUsers fetch error:', e);
+				document.getElementById('usersTable').innerHTML = '<tr><td colspan="7" style="color:var(--danger);padding:1rem;">Failed to load. Check console.</td></tr>';
+			}
+		}
+
+		function renderUsersTable(users) {
+			if (!users.length) {
+				document.getElementById('usersTable').innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-people"></i><p>No users found</p></div></td></tr>';
+				return;
+			}
+			document.getElementById('usersTable').innerHTML = users.map((u, i) => `
+				<tr>
+					<td style="color:var(--muted);">${i + 1}</td>
+					<td><strong>${u.fullName}</strong></td>
+					<td style="color:var(--muted);font-size:0.82rem;">${u.email}</td>
+					<td style="color:var(--muted);font-size:0.82rem;">${u.phone || '—'}</td>
+					<td><span class="badge-role ${u.role === 'ADMIN' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td>
+					<td style="color:var(--muted);font-size:0.82rem;">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN') : '—'}</td>
+					<td>
+						<div style="display:flex;gap:6px;">
+							<button class="btn-sm-accent" onclick="openRoleModal(${u.id}, '${u.fullName}', '${u.role}')">
+								<i class="bi bi-shield"></i> Role
+							</button>
+							${u.role !== 'ADMIN' ? `<button class="btn-sm-danger" onclick="openDeleteModal(${u.id}, '${u.fullName}')">
+								<i class="bi bi-trash"></i>
+							</button>` : ''}
+						</div>
+					</td>
+				</tr>
+			`).join('');
+		}
+
+		function filterUsers() {
+			const q = document.getElementById('userSearch').value.toLowerCase();
+			const filtered = allUsers.filter(u =>
+				u.fullName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+			);
+			renderUsersTable(filtered);
+		}
+
+		// ── Load all expenses ─────────────────────────────────────────────────
+		async function loadAllExpenses() {
+			document.getElementById('expensesTable').innerHTML = '<tr><td colspan="7"><div class="skeleton" style="margin:8px 0;height:20px;"></div></td></tr>';
+			document.getElementById('expStartDate').value = '';
+			document.getElementById('expEndDate').value = '';
+			try {
+				const res = await apiFetch('/expense/getAll');
+				const data = await res.json();
+				allExpenses = data.data || [];
+				renderExpensesTable(allExpenses);
+			} catch (e) {
+				document.getElementById('expensesTable').innerHTML = '<tr><td colspan="7" style="color:var(--danger);padding:1rem;">Failed to load expenses</td></tr>';
+			}
+		}
+
+		async function loadExpensesByDate() {
+			const start = document.getElementById('expStartDate').value;
+			const end = document.getElementById('expEndDate').value;
+			if (!start || !end) {showToast('Please select both start and end dates', 'error'); return;}
+			if (start > end) {showToast('Start date cannot be after end date', 'error'); return;}
+
+			document.getElementById('expensesTable').innerHTML = '<tr><td colspan="7"><div class="skeleton" style="margin:8px 0;height:20px;"></div></td></tr>';
+			try {
+				const res = await apiFetch(`/expense/search?startDate=${start}&endDate=${end}`);
+				const data = await res.json();
+				const expenses = data.data?.expenses || [];
+				allExpenses = expenses;
+				renderExpensesTable(expenses);
+			} catch (e) {
+				document.getElementById('expensesTable').innerHTML = '<tr><td colspan="7" style="color:var(--danger);padding:1rem;">Failed to load expenses</td></tr>';
+			}
+		}
+
+		function renderExpensesTable(expenses) {
+			const total = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+			document.getElementById('expensesTotal').textContent = '₹' + total.toLocaleString('en-IN', {maximumFractionDigits: 2});
+
+			if (!expenses.length) {
+				document.getElementById('expensesTable').innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-receipt"></i><p>No expenses found</p></div></td></tr>';
+				return;
+			}
+
+			document.getElementById('expensesTable').innerHTML = expenses.map((e, i) => `
+				<tr>
+					<td style="color:var(--muted);">${i + 1}</td>
+					<td><strong>${e.title}</strong>${e.description ? `<div style="font-size:0.75rem;color:var(--muted);">${e.description}</div>` : ''}</td>
+					<td style="font-size:0.82rem;color:var(--muted);">${e.user?.fullName || '—'}</td>
+					<td><span class="badge-category">${e.category || '—'}</span></td>
+					<td style="color:var(--accent);font-weight:700;">₹${parseFloat(e.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+					<td style="font-size:0.82rem;color:var(--muted);">${e.paymentMethod || '—'}</td>
+					<td style="font-size:0.82rem;color:var(--muted);">${e.date ? new Date(e.date).toLocaleDateString('en-IN') : '—'}</td>
+				</tr>
+			`).join('');
+		}
+
+		function filterExpenses() {
+			const q = document.getElementById('expenseSearch').value.toLowerCase();
+			const filtered = allExpenses.filter(e =>
+				e.title.toLowerCase().includes(q) ||
+				(e.user?.fullName || '').toLowerCase().includes(q)
+			);
+			renderExpensesTable(filtered);
+		}
+
+		// ── Role modal ────────────────────────────────────────────────────────
+		function openRoleModal(id, name, currentRole) {
+			selectedUserId = id;
+			selectedUserName = name;
+			document.getElementById('roleModalName').textContent = name;
+			document.getElementById('roleSelect').value = currentRole;
+			document.getElementById('roleModal').classList.add('open');
+		}
+
+		function closeRoleModal() {document.getElementById('roleModal').classList.remove('open');}
+		function closeRoleModalOverlay(e) {if (e.target === document.getElementById('roleModal')) closeRoleModal();}
+
+		async function confirmRoleChange() {
+			const role = document.getElementById('roleSelect').value;
+			try {
+				const res = await apiFetch(`/admin/users/${selectedUserId}/role?role=${role}`, {method: 'PUT'});
+				if (res.ok) {
+					showToast(`Role updated to ${role} for ${selectedUserName}`, 'success');
+					closeRoleModal();
+					loadUsers();
+					loadOverview();
+				} else {
+					const d = await res.json();
+					showToast(d.message || 'Failed to update role', 'error');
+				}
+			} catch (e) {
+				showToast('Server error', 'error');
+			}
+		}
+
+		// ── Delete modal ──────────────────────────────────────────────────────
+		function openDeleteModal(id, name) {
+			selectedUserId = id;
+			document.getElementById('deleteModalName').textContent = name;
+			document.getElementById('deleteModal').classList.add('open');
+		}
+
+		function closeDeleteModal() {document.getElementById('deleteModal').classList.remove('open');}
+		function closeDeleteModalOverlay(e) {if (e.target === document.getElementById('deleteModal')) closeDeleteModal();}
+
+		async function confirmDelete() {
+			try {
+				const res = await apiFetch(`/admin/users/${selectedUserId}`, {method: 'DELETE'});
+				if (res.ok) {
+					showToast('User deleted successfully', 'success');
+					closeDeleteModal();
+					loadUsers();
+					loadOverview();
+				} else {
+					const d = await res.json();
+					showToast(d.message || 'Failed to delete user', 'error');
+				}
+			} catch (e) {
+				showToast('Server error', 'error');
+			}
+		}
+
+		// ── Toast ─────────────────────────────────────────────────────────────
+		function showToast(msg, type = 'success') {
+			const container = document.getElementById('toastContainer');
+			const toast = document.createElement('div');
+			toast.className = `toast ${type}`;
+			toast.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+			container.appendChild(toast);
+			setTimeout(() => toast.remove(), 3500);
+		}
+
+		// ── Logout ────────────────────────────────────────────────────────────
+		function logout() {
+			sessionStorage.removeItem('user');
+			window.location.href = '/login';
+		}
+
+		// ── Init ──────────────────────────────────────────────────────────────
+		loadOverview();
+	</script>
+
+	<!-- Theme toggle -->
+	<div id="themeToggleWrap" style="position:fixed;top:1rem;right:1rem;z-index:9999;"></div>
+	<script>document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();</script>
+</body>
+
+</html>

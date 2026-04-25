@@ -63,7 +63,6 @@ public class ExpenseDao {
 	public List<Expense> getExpenseByDateRangeAllUsers(LocalDate startDate, LocalDate endDate) {
 		return expenseRepository.getExpenseByDateRangeAllUsers(startDate, endDate);
 	}
-	
 
 	// ─── Report methods ────────────────────────────────────────────────────────
 
@@ -82,7 +81,8 @@ public class ExpenseDao {
 	}
 
 	public List<Expense> getExpenseByCategory(Long userId, String category) {
-		return expenseRepository.getExpenseByCategory(userId, category);
+		return expenseRepository.getExpenseByCategory(userId,
+				com.expensetracker.enums.Categories.valueOf(category.toUpperCase()));
 	}
 
 	public Page<Expense> getAllExpenseByUserPaginated(Long userId, int page, int size, String sortBy, String sortDir) {
