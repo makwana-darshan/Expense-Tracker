@@ -10,6 +10,7 @@
 		href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap"
 		rel="stylesheet" />
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<script src="theme.js"></script>
 	<style>
 		:root {
 			--bg: #0d1117;
@@ -197,7 +198,6 @@
 			margin-bottom: 2rem;
 		}
 
-		/* Report tabs */
 		.report-tabs {
 			display: flex;
 			gap: 8px;
@@ -229,7 +229,6 @@
 			color: var(--accent);
 		}
 
-		/* Report card */
 		.report-card {
 			background: var(--card);
 			border: 1px solid var(--border);
@@ -274,8 +273,7 @@
 			flex-wrap: wrap;
 		}
 
-		.controls select,
-		.controls input {
+		.controls select {
 			background: var(--bg);
 			border: 1px solid var(--border);
 			color: var(--text);
@@ -287,8 +285,7 @@
 			transition: border-color 0.2s;
 		}
 
-		.controls select:focus,
-		.controls input:focus {
+		.controls select:focus {
 			border-color: var(--accent);
 		}
 
@@ -313,9 +310,38 @@
 			opacity: 0.9;
 		}
 
-		/* Expense list in report */
+		.btn-pdf {
+			background: rgba(248, 81, 73, 0.1);
+			border: 1px solid rgba(248, 81, 73, 0.3);
+			color: var(--danger);
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 0.82rem;
+			padding: 0.5rem 1.1rem;
+			border-radius: 10px;
+			cursor: pointer;
+			transition: all 0.2s;
+			white-space: nowrap;
+		}
+
+		.btn-pdf:hover {
+			background: rgba(248, 81, 73, 0.2);
+		}
+
+		.chart-wrap {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+			margin-bottom: 1.5rem;
+			height: 300px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
 		.report-list {
-			margin-top: 1.25rem;
+			margin-top: 0;
 		}
 
 		.report-item {
@@ -365,43 +391,6 @@
 			font-family: 'Sora', sans-serif;
 			font-weight: 700;
 			color: var(--accent);
-		}
-
-		/* Category breakdown */
-		.cat-breakdown {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-			gap: 10px;
-			margin-top: 1.25rem;
-		}
-
-		.cat-item {
-			background: var(--bg);
-			border: 1px solid var(--border);
-			border-radius: 12px;
-			padding: 1rem;
-			text-align: center;
-		}
-
-		.cat-item-icon {
-			font-size: 1.5rem;
-			margin-bottom: 6px;
-		}
-
-		.cat-item-name {
-			font-size: 0.72rem;
-			font-weight: 700;
-			color: var(--muted);
-			text-transform: uppercase;
-			letter-spacing: 0.5px;
-		}
-
-		.cat-item-amount {
-			font-family: 'Sora', sans-serif;
-			font-size: 1rem;
-			font-weight: 800;
-			color: var(--accent);
-			margin-top: 4px;
 		}
 
 		.empty-state {
@@ -466,28 +455,26 @@
 			color: var(--muted);
 		}
 	</style>
-	<script src="theme.js"></script>
 </head>
 
 <body>
 	<div class="sidebar">
-		<a href="/" style="text-decoration:none;color:inherit;"><a href="/dashboard"
-				style="text-decoration:none;color:inherit;">
-				<div class="sidebar-brand">
-					<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
-					<span>ExpenseTracker</span>
-				</div>
-			</a></a>
+		<a href="/dashboard" style="text-decoration:none;color:inherit;">
+			<div class="sidebar-brand">
+				<div class="sidebar-brand-icon"><i class="bi bi-wallet2"></i></div>
+				<span>ExpenseTracker</span>
+			</div>
+		</a>
 		<ul class="nav flex-column" style="gap:2px;">
 			<li class="nav-item"><a href="/dashboard" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a></li>
 			<li class="nav-item"><a href="/add-expense" class="nav-link"><i class="bi bi-plus-circle"></i> Add
 					Expense</a></li>
 			<li class="nav-item"><a href="/view-expense" class="nav-link"><i class="bi bi-list-ul"></i> View
 					Expenses</a></li>
-			<li class="nav-item"><a href="/reports" class="nav-link active"><i class="bi bi-bar-chart"></i>
-					Reports</a></li>
-			<li class="nav-item"><a href="/change-password" class="nav-link"><i class="bi bi-shield-lock"></i>
-					Change Password</a></li>
+			<li class="nav-item"><a href="/reports" class="nav-link active"><i class="bi bi-bar-chart"></i> Reports</a>
+			</li>
+			<li class="nav-item"><a href="/change-password" class="nav-link"><i class="bi bi-shield-lock"></i> Change
+					Password</a></li>
 		</ul>
 		<div class="sidebar-footer">
 			<div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;" id="themeToggleWrap"></div>
@@ -518,6 +505,7 @@
 		</div>
 
 		<div class="report-card">
+
 			<!-- Weekly -->
 			<div id="weeklySection">
 				<div class="report-header">
@@ -526,7 +514,11 @@
 						<div class="report-total-label">Last 7 days</div>
 						<div class="report-total" id="weeklyTotal">₹0</div>
 					</div>
+					<button class="btn-pdf" onclick="downloadPDF('weeklySection', 'Weekly_Report')">
+						<i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
+					</button>
 				</div>
+				<div class="chart-wrap"><canvas id="weeklyChart" style="width:100%;height:100%;"></canvas></div>
 				<div class="report-list" id="weeklyList">
 					<div class="empty-state"><i class="bi bi-clock-history"></i>Loading...</div>
 				</div>
@@ -540,25 +532,31 @@
 						<div class="report-total-label">Total for selected month</div>
 						<div class="report-total" id="monthlyTotal">₹0</div>
 					</div>
-					<div class="controls">
-						<select id="monthSelect">
-							<option value="1">January</option>
-							<option value="2">February</option>
-							<option value="3">March</option>
-							<option value="4">April</option>
-							<option value="5">May</option>
-							<option value="6">June</option>
-							<option value="7">July</option>
-							<option value="8">August</option>
-							<option value="9">September</option>
-							<option value="10">October</option>
-							<option value="11">November</option>
-							<option value="12">December</option>
-						</select>
-						<select id="monthYearSelect"></select>
-						<button class="btn-fetch" onclick="loadMonthly()">Fetch</button>
+					<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+						<div class="controls">
+							<select id="monthSelect">
+								<option value="1">January</option>
+								<option value="2">February</option>
+								<option value="3">March</option>
+								<option value="4">April</option>
+								<option value="5">May</option>
+								<option value="6">June</option>
+								<option value="7">July</option>
+								<option value="8">August</option>
+								<option value="9">September</option>
+								<option value="10">October</option>
+								<option value="11">November</option>
+								<option value="12">December</option>
+							</select>
+							<select id="monthYearSelect"></select>
+							<button class="btn-fetch" onclick="loadMonthly()">Fetch</button>
+						</div>
+						<button class="btn-pdf" onclick="downloadPDF('monthlySection', 'Monthly_Report')">
+							<i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
+						</button>
 					</div>
 				</div>
+				<div class="chart-wrap"><canvas id="monthlyChart" style="width:100%;height:100%;"></canvas></div>
 				<div class="report-list" id="monthlyList"></div>
 			</div>
 
@@ -570,11 +568,17 @@
 						<div class="report-total-label">Total for selected year</div>
 						<div class="report-total" id="yearlyTotal">₹0</div>
 					</div>
-					<div class="controls">
-						<select id="yearSelect"></select>
-						<button class="btn-fetch" onclick="loadYearly()">Fetch</button>
+					<div style="display:flex;gap:10px;align-items:center;">
+						<div class="controls">
+							<select id="yearSelect"></select>
+							<button class="btn-fetch" onclick="loadYearly()">Fetch</button>
+						</div>
+						<button class="btn-pdf" onclick="downloadPDF('yearlySection', 'Yearly_Report')">
+							<i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
+						</button>
 					</div>
 				</div>
+				<div class="chart-wrap"><canvas id="yearlyChart" style="width:100%;height:100%;"></canvas></div>
 				<div class="report-list" id="yearlyList"></div>
 			</div>
 
@@ -584,59 +588,146 @@
 					<div>
 						<div class="report-title">Category Breakdown</div>
 						<div class="report-total-label">Spending by category</div>
+						<div class="report-total" id="categoryTotal">₹0</div>
 					</div>
-					<div class="controls">
-						<select id="catSelect">
-							<option>FOOD</option>
-							<option>TRAVEL</option>
-							<option>SHOPPING</option>
-							<option>BILLS</option>
-							<option>ENTERTAINMENT</option>
-							<option>HEALTH</option>
-							<option>EDUCATION</option>
-							<option>OTHER</option>
-						</select>
-						<button class="btn-fetch" onclick="loadCategory()">Fetch</button>
+					<div style="display:flex;gap:10px;align-items:center;">
+						<div class="controls">
+							<select id="catSelect">
+								<option>FOOD</option>
+								<option>TRAVEL</option>
+								<option>SHOPPING</option>
+								<option>BILLS</option>
+								<option>ENTERTAINMENT</option>
+								<option>HEALTH</option>
+								<option>EDUCATION</option>
+								<option>OTHER</option>
+							</select>
+							<button class="btn-fetch" onclick="loadCategory()">Fetch</button>
+						</div>
+						<button class="btn-pdf" onclick="downloadPDF('categorySection', 'Category_Report')">
+							<i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
+						</button>
 					</div>
 				</div>
-				<div class="report-total" id="categoryTotal" style="margin-bottom:1rem;">₹0</div>
+				<div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+					<div class="chart-wrap" style="flex:1;min-width:260px;"><canvas id="categoryChart"
+							style="width:100%;height:100%;"></canvas></div>
+				</div>
 				<div class="report-list" id="categoryList"></div>
 			</div>
+
 		</div>
 	</div>
 
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 	<script>
 		const BASE_URL = 'http://localhost:8080';
 		const session = JSON.parse(sessionStorage.getItem('user'));
-		if (!session) window.location.href = '/login';
+		if (!session || !session.token) window.location.href = '/login';
 		const user = session.user;
 		const token = session.token;
 
 		document.getElementById('userName').textContent = user.fullName;
 		document.getElementById('userRole').textContent = user.role || 'USER';
 		document.getElementById('userAvatar').textContent = user.fullName.charAt(0).toUpperCase();
+		document.getElementById('themeToggleWrap').innerHTML = renderThemeToggle();
 
 		const now = new Date();
 		const currentYear = now.getFullYear();
 		const currentMonth = now.getMonth() + 1;
 
-		// Populate year dropdowns
-		[document.getElementById('monthYearSelect'), document.getElementById('yearSelect')].forEach(sel => {
+		['monthYearSelect', 'yearSelect'].forEach(id => {
+			const sel = document.getElementById(id);
 			if (!sel) return;
 			for (let y = currentYear; y >= currentYear - 3; y--) {
 				const opt = document.createElement('option');
 				opt.value = y; opt.textContent = y; sel.appendChild(opt);
 			}
 		});
-		if (document.getElementById('monthSelect')) document.getElementById('monthSelect').value = currentMonth;
+		document.getElementById('monthSelect').value = currentMonth;
 
-		function formatCurrency(a) {return '₹' + parseFloat(a || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});}
+		const CAT_COLORS = {
+			FOOD: '#00e5a0', TRAVEL: '#388bfd', SHOPPING: '#e3b341',
+			BILLS: '#f85149', ENTERTAINMENT: '#bc8cff', HEALTH: '#3fb950',
+			EDUCATION: '#39d353', OTHER: '#8b949e'
+		};
 
-		function getCatIcon(cat) {
-			const icons = {FOOD: '🍽️', TRAVEL: '✈️', SHOPPING: '🛍️', BILLS: '📄', ENTERTAINMENT: '🎮', HEALTH: '💊', EDUCATION: '📚', OTHER: '📦'};
-			return icons[cat] || '📦';
+		const CAT_ICONS = {FOOD: '🍽️', TRAVEL: '✈️', SHOPPING: '🛍️', BILLS: '📄', ENTERTAINMENT: '🎮', HEALTH: '💊', EDUCATION: '📚', OTHER: '📦'};
+
+		function formatCurrency(a) {
+			return '₹' + parseFloat(a || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
 		}
 
+		function calcTotal(expenses) {
+			return expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+		}
+
+		// ── Chart instances ──────────────────────────────────────────────────
+		const charts = {};
+
+		function groupByCategory(expenses) {
+			const grouped = {};
+			expenses.forEach(e => {
+				grouped[e.category] = (grouped[e.category] || 0) + parseFloat(e.amount || 0);
+			});
+			return grouped;
+		}
+
+		function drawPieChart(canvasId, expenses) {
+			if (charts[canvasId]) charts[canvasId].destroy();
+			if (!expenses || expenses.length === 0) return;
+			const grouped = groupByCategory(expenses);
+			const labels = Object.keys(grouped);
+			const values = Object.values(grouped);
+			const total = values.reduce((a, b) => a + b, 0);
+			charts[canvasId] = new Chart(document.getElementById(canvasId), {
+				type: 'pie',
+				data: {
+					labels,
+					datasets: [{
+						data: values,
+						backgroundColor: labels.map(l => CAT_COLORS[l] || '#8b949e'),
+						borderWidth: 3,
+						borderColor: '#161b22',
+						hoverOffset: 10
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					layout: {padding: 10},
+					plugins: {
+						legend: {
+							position: 'bottom',
+							labels: {
+								color: '#e6edf3',
+								font: {family: 'Nunito', size: 12},
+								padding: 20,
+								usePointStyle: true,
+								pointStyleWidth: 10
+							}
+						},
+						tooltip: {
+							callbacks: {
+								label: ctx => {
+									const pct = ((ctx.parsed / total) * 100).toFixed(1);
+									return `  ₹${ctx.parsed.toLocaleString('en-IN')}  (${pct}%)`;
+								}
+							}
+						}
+					}
+				}
+			});
+		}
+
+		function drawDoughnutChart(canvasId, expenses) {
+			drawPieChart(canvasId, expenses);
+		}
+
+		// ── Render expense list ──────────────────────────────────────────────
 		function renderExpenses(expenses, containerId) {
 			const container = document.getElementById(containerId);
 			if (!expenses || expenses.length === 0) {
@@ -644,29 +735,27 @@
 				return;
 			}
 			container.innerHTML = expenses.map(e => `
-        <div class="report-item">
-          <div class="report-item-left">
-            <div class="report-item-icon" style="background:var(--accent-dim);">${getCatIcon(e.category)}</div>
-            <div>
-              <div class="report-item-title">${e.title}</div>
-              <div class="report-item-meta">${e.date} &bull; <span class="badge-category badge-${e.category}">${e.category}</span> &bull; ${e.paymentMethod || '-'}</div>
-            </div>
-          </div>
-          <div class="report-item-amount">${formatCurrency(e.amount)}</div>
-        </div>
-      `).join('');
+				<div class="report-item">
+					<div class="report-item-left">
+						<div class="report-item-icon" style="background:var(--accent-dim);">${CAT_ICONS[e.category] || '📦'}</div>
+						<div>
+							<div class="report-item-title">${e.title}</div>
+							<div class="report-item-meta">${e.date} &bull; <span class="badge-category badge-${e.category}">${e.category}</span> &bull; ${e.paymentMethod || '-'}</div>
+						</div>
+					</div>
+					<div class="report-item-amount">${formatCurrency(e.amount)}</div>
+				</div>
+			`).join('');
 		}
 
-		function calcTotal(expenses) {
-			return expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
-		}
-
+		// ── Load functions ───────────────────────────────────────────────────
 		async function loadWeekly() {
 			try {
 				const res = await fetch(`${BASE_URL}/report/weekly/${user.id}`, {headers: {'Authorization': 'Bearer ' + token}});
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('weeklyTotal').textContent = formatCurrency(calcTotal(expenses));
+				drawPieChart('weeklyChart', expenses);
 				renderExpenses(expenses, 'weeklyList');
 			} catch (e) {console.error(e);}
 		}
@@ -679,6 +768,7 @@
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('monthlyTotal').textContent = formatCurrency(calcTotal(expenses));
+				drawPieChart('monthlyChart', expenses);
 				renderExpenses(expenses, 'monthlyList');
 			} catch (e) {console.error(e);}
 		}
@@ -690,6 +780,7 @@
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('yearlyTotal').textContent = formatCurrency(calcTotal(expenses));
+				drawPieChart('yearlyChart', expenses);
 				renderExpenses(expenses, 'yearlyList');
 			} catch (e) {console.error(e);}
 		}
@@ -701,6 +792,7 @@
 				const data = await res.json();
 				const expenses = data.data || [];
 				document.getElementById('categoryTotal').textContent = formatCurrency(calcTotal(expenses));
+				drawDoughnutChart('categoryChart', expenses);
 				renderExpenses(expenses, 'categoryList');
 			} catch (e) {console.error(e);}
 		}
@@ -717,11 +809,163 @@
 		}
 
 		function logout() {sessionStorage.clear(); window.location.href = '/login';}
+
+		async function downloadPDF(sectionId, filename) {
+			const {jsPDF} = window.jspdf;
+			const section = document.getElementById(sectionId);
+			const btn = section.querySelector('.btn-pdf');
+			btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Generating...';
+			btn.disabled = true;
+
+			try {
+				const pdf = new jsPDF({orientation: 'portrait', unit: 'mm', format: 'a4'});
+				const pageW = pdf.internal.pageSize.getWidth();
+				const pageH = pdf.internal.pageSize.getHeight();
+				const margin = 14;
+				const contentW = pageW - margin * 2;
+				let y = 0;
+
+				const fmt = (amt) => 'Rs. ' + parseFloat(amt || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+				// ── Header ───────────────────────────────────────────────
+				pdf.setFillColor(13, 17, 23);
+				pdf.rect(0, 0, pageW, 24, 'F');
+				pdf.setFillColor(0, 229, 160);
+				pdf.rect(0, 0, 4, 24, 'F');
+				pdf.setTextColor(0, 229, 160);
+				pdf.setFontSize(15); pdf.setFont('helvetica', 'bold');
+				pdf.text('ExpenseTracker', 10, 10);
+				pdf.setTextColor(160, 160, 160);
+				pdf.setFontSize(8); pdf.setFont('helvetica', 'normal');
+				pdf.text('Expense Report', 10, 17);
+				pdf.setTextColor(120, 120, 120);
+				pdf.setFontSize(7.5);
+				pdf.text('Generated: ' + new Date().toLocaleString('en-IN'), pageW - margin, 9, {align: 'right'});
+				pdf.text('User: ' + user.fullName, pageW - margin, 16, {align: 'right'});
+				y = 32;
+
+				// ── Title box ────────────────────────────────────────────
+				const titleEl = section.querySelector('.report-title');
+				const labelEl = section.querySelector('.report-total-label');
+				const totalEl = section.querySelector('.report-total');
+				const totalAmt = totalEl ? totalEl.textContent.replace('₹', '').trim() : '0';
+
+				pdf.setFillColor(22, 27, 34);
+				pdf.roundedRect(margin, y, contentW, 20, 2, 2, 'F');
+				pdf.setTextColor(230, 237, 243);
+				pdf.setFontSize(12); pdf.setFont('helvetica', 'bold');
+				pdf.text(titleEl ? titleEl.textContent : '', margin + 5, y + 8);
+				pdf.setTextColor(100, 110, 120);
+				pdf.setFontSize(7.5); pdf.setFont('helvetica', 'normal');
+				pdf.text(labelEl ? labelEl.textContent.toUpperCase() : '', margin + 5, y + 15);
+				pdf.setTextColor(0, 229, 160);
+				pdf.setFontSize(13); pdf.setFont('helvetica', 'bold');
+				pdf.text('Rs. ' + totalAmt, pageW - margin - 5, y + 10, {align: 'right'});
+				y += 26;
+
+				// ── Chart ────────────────────────────────────────────────
+				const chartCanvas = section.querySelector('canvas');
+				if (chartCanvas) {
+					// Get the chart data from the existing chart instance
+					const existingChart = Object.values(Chart.instances).find(c => c.canvas === chartCanvas);
+					if (existingChart) {
+						// Render fresh chart on a proper square offscreen canvas
+						const offscreen = document.createElement('canvas');
+						offscreen.width = 500; offscreen.height = 500;
+						document.body.appendChild(offscreen);
+						const tempChart = new Chart(offscreen, {
+							type: 'pie',
+							data: existingChart.data,
+							options: {
+								responsive: false,
+								animation: false,
+								plugins: {
+									legend: {
+										position: 'bottom',
+										labels: {color: '#333', font: {size: 14}, padding: 16, usePointStyle: true}
+									}
+								}
+							}
+						});
+						// Wait for render
+						await new Promise(r => setTimeout(r, 300));
+						const chartImg = offscreen.toDataURL('image/png');
+						tempChart.destroy();
+						document.body.removeChild(offscreen);
+						const chartSize = 90;
+						pdf.addImage(chartImg, 'PNG', (pageW - chartSize) / 2, y, chartSize, chartSize);
+						y += chartSize + 8;
+					}
+				}
+
+				// ── Divider ──────────────────────────────────────────────
+				pdf.setDrawColor(48, 54, 61);
+				pdf.line(margin, y, pageW - margin, y);
+				y += 6;
+
+				// ── Table header ─────────────────────────────────────────
+				pdf.setFillColor(13, 17, 23);
+				pdf.rect(margin, y, contentW, 7, 'F');
+				pdf.setTextColor(100, 110, 120);
+				pdf.setFontSize(7); pdf.setFont('helvetica', 'bold');
+				const cols = {title: margin + 3, cat: margin + 72, date: margin + 108, pay: margin + 136, amt: pageW - margin - 3};
+				pdf.text('TITLE', cols.title, y + 5);
+				pdf.text('CATEGORY', cols.cat, y + 5);
+				pdf.text('DATE', cols.date, y + 5);
+				pdf.text('PAYMENT', cols.pay, y + 5);
+				pdf.text('AMOUNT', cols.amt, y + 5, {align: 'right'});
+				y += 7;
+
+				// ── Table rows ───────────────────────────────────────────
+				const items = section.querySelectorAll('.report-item');
+				if (!items.length) {
+					pdf.setTextColor(120, 120, 120); pdf.setFontSize(9);
+					pdf.text('No expenses found.', pageW / 2, y + 8, {align: 'center'});
+				} else {
+					items.forEach((item, i) => {
+						if (y > pageH - 18) {pdf.addPage(); y = 15;}
+						const rh = 9;
+						pdf.setFillColor(i % 2 === 0 ? 22 : 18, i % 2 === 0 ? 27 : 22, i % 2 === 0 ? 34 : 28);
+						pdf.rect(margin, y, contentW, rh, 'F');
+
+						const title = item.querySelector('.report-item-title')?.textContent?.trim() || '';
+						const meta = item.querySelector('.report-item-meta')?.textContent?.trim() || '';
+						const amount = item.querySelector('.report-item-amount')?.textContent?.replace('₹', '').trim() || '';
+						const parts = meta.split('•').map(s => s.trim());
+
+						pdf.setTextColor(220, 227, 235); pdf.setFontSize(8); pdf.setFont('helvetica', 'bold');
+						pdf.text(title.length > 26 ? title.slice(0, 26) + '…' : title, cols.title, y + 6);
+						pdf.setFont('helvetica', 'normal'); pdf.setTextColor(139, 148, 158);
+						pdf.text(parts[1] || '', cols.cat, y + 6);
+						pdf.text(parts[0] || '', cols.date, y + 6);
+						pdf.text(parts[2] || '', cols.pay, y + 6);
+						pdf.setFont('helvetica', 'bold'); pdf.setTextColor(0, 229, 160);
+						pdf.text('Rs. ' + amount, cols.amt, y + 6, {align: 'right'});
+
+						pdf.setDrawColor(35, 40, 48);
+						pdf.line(margin, y + rh, pageW - margin, y + rh);
+						y += rh;
+					});
+				}
+
+				// ── Footer ───────────────────────────────────────────────
+				pdf.setFillColor(13, 17, 23);
+				pdf.rect(0, pageH - 10, pageW, 10, 'F');
+				pdf.setTextColor(80, 88, 98); pdf.setFontSize(7); pdf.setFont('helvetica', 'normal');
+				pdf.text('ExpenseTracker — Confidential', margin, pageH - 3);
+				pdf.text('Page 1', pageW - margin, pageH - 3, {align: 'right'});
+
+				pdf.save(`${filename}_${new Date().toISOString().split('T')[0]}.pdf`);
+			} catch (e) {
+				console.error(e); alert('Failed to generate PDF.');
+			} finally {
+				btn.innerHTML = '<i class="bi bi-file-earmark-pdf me-1"></i> Download PDF';
+				btn.disabled = false;
+			}
+		}
+
 		loadWeekly();
-		// ─── Theme toggle init
-		document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();
 	</script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
