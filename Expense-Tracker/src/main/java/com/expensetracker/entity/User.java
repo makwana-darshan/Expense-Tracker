@@ -48,6 +48,8 @@ public class User {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 
+	private java.math.BigDecimal monthlyBudget;
+
 	public User() {
 	}
 
@@ -136,5 +138,13 @@ public class User {
 
 	public LocalDateTime getUpdatedAt() {
 		return updatedAt;
+	}
+
+	public java.math.BigDecimal getMonthlyBudget() {
+		return monthlyBudget;
+	}
+
+	public void setMonthlyBudget(java.math.BigDecimal monthlyBudget) {
+		this.monthlyBudget = monthlyBudget;
 	}
 }

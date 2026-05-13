@@ -54,7 +54,6 @@ public class UserService {
 			throw new DuplicateEmailException("User with email '" + user.getEmail() + "' already exists");
 		}
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		// Always force USER role — ADMIN is created only via AdminInitializer
 		user.setRole(Roles.USER);
 
 		ResponseStructure<User> response = new ResponseStructure<>();
@@ -260,5 +259,19 @@ public class UserService {
 		if (caller.getRole() != Roles.ADMIN && !caller.getId().equals(targetUserId)) {
 			throw new UnauthorizedAccessException("Access denied: you can only access your own profile");
 		}
+	}
+
+	// ─── Update Monthly Budget ─────────────────────────────────────────────────
+	public ResponseEntity<ResponseStructure<String>> updateBudget(Long userId, java.math.BigDecimal budget) {
+		User caller = securityUtils.getCurrentUser();
+		verifyOwnerOrAdmin(caller, userId);
+		User user = userDao.getUserById(userId);
+		user.setMonthlyBudget(budget);
+		userDao.saveUser(user);
+		ResponseStructure<String> response = new ResponseStructure<>();
+		response.setStatusCode(HttpStatus.OK.value());
+		response.setMessage("Budget updated successfully");
+		response.setData("Monthly budget set to " + budget);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

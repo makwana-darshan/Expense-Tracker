@@ -454,6 +454,68 @@
 			</div>
 		</div>
 
+		<!-- Smart Budget Alert -->
+		<div class="stat-card mb-4" id="budgetWidget">
+			<div class="d-flex align-items-center justify-content-between mb-3">
+				<div>
+					<div class="stat-label">Smart Budget Alert</div>
+					<div style="font-size:0.8rem;color:var(--muted);">Monthly spending limit</div>
+				</div>
+				<div style="display:flex;align-items:center;gap:8px;">
+					<div id="budgetAlertBadge" style="display:none;"></div>
+					<button onclick="toggleBudgetEdit()"
+						style="background:var(--accent-dim);border:1px solid rgba(0,229,160,0.2);color:var(--accent);border-radius:8px;padding:4px 12px;font-size:0.78rem;font-weight:700;cursor:pointer;"
+						id="budgetEditBtn">
+						<i class="bi bi-pencil"></i> Set Budget
+					</button>
+				</div>
+			</div>
+
+			<!-- Budget not set state -->
+			<div id="budgetNotSet" style="text-align:center;padding:1rem 0;color:var(--muted);font-size:0.85rem;">
+				<i class="bi bi-piggy-bank"
+					style="font-size:1.5rem;display:block;margin-bottom:0.5rem;opacity:0.5;"></i>
+				No budget set. Click "Set Budget" to get started.
+			</div>
+
+			<!-- Budget set state -->
+			<div id="budgetSet" style="display:none;">
+				<div class="d-flex justify-content-between align-items-center mb-2">
+					<span style="font-size:0.85rem;color:var(--muted);">Spent this month</span>
+					<span style="font-size:0.85rem;font-weight:700;">
+						<span id="budgetSpent" style="color:var(--text);">₹0</span>
+						<span style="color:var(--muted);"> / </span>
+						<span id="budgetLimit" style="color:var(--accent);">₹0</span>
+					</span>
+				</div>
+				<div style="background:var(--border);border-radius:20px;height:10px;overflow:hidden;">
+					<div id="budgetBar"
+						style="height:100%;border-radius:20px;transition:width 0.6s ease,background 0.4s;width:0%;background:#3fb950;">
+					</div>
+				</div>
+				<div class="d-flex justify-content-between mt-2">
+					<span id="budgetPct" style="font-size:0.78rem;font-weight:700;color:#3fb950;">0% used</span>
+					<span id="budgetRemaining" style="font-size:0.78rem;color:var(--muted);">₹0 remaining</span>
+				</div>
+			</div>
+
+			<!-- Budget edit form -->
+			<div id="budgetEditForm" style="display:none;margin-top:1rem;">
+				<div style="display:flex;gap:8px;align-items:center;">
+					<div style="position:relative;flex:1;">
+						<span
+							style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);">₹</span>
+						<input type="number" id="budgetInput" placeholder="e.g. 10000" min="1"
+							style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:0.55rem 0.75rem 0.55rem 1.75rem;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;" />
+					</div>
+					<button onclick="saveBudget()"
+						style="background:var(--accent);border:none;color:#0d1117;font-family:'Sora',sans-serif;font-weight:700;font-size:0.85rem;padding:0.55rem 1.1rem;border-radius:9px;cursor:pointer;">Save</button>
+					<button onclick="toggleBudgetEdit()"
+						style="background:var(--card);border:1px solid var(--border);color:var(--muted);font-family:'Sora',sans-serif;font-weight:700;font-size:0.85rem;padding:0.55rem 1rem;border-radius:9px;cursor:pointer;">Cancel</button>
+				</div>
+			</div>
+		</div>
+
 		<!-- Recent Expenses -->
 		<div class="section-title">Recent Expenses</div>
 		<div class="expenses-table">
@@ -530,6 +592,12 @@
 				const monthTotal = (monthData.data || []).reduce((s, e) => s + parseFloat(e.amount), 0);
 				document.getElementById('monthlyTotal').textContent = formatCurrency(monthTotal);
 
+				// Budget widget
+				currentMonthSpent = monthTotal;
+				const budget = session.user.monthlyBudget;
+				updateBudgetWidget(budget, monthTotal);
+				if (budget) document.getElementById('budgetInput').value = budget;
+
 				// All expenses
 				const allRes = await fetch(`${BASE_URL}/expense/getAll/${userId}`, {headers});
 				const allData = await allRes.json();
@@ -562,10 +630,84 @@
 			window.location.href = '/login';
 		}
 
+		// ── Budget functions ─────────────────────────────────────────────
+		let currentMonthSpent = 0;
+
+		function toggleBudgetEdit() {
+			const form = document.getElementById('budgetEditForm');
+			const visible = form.style.display !== 'none';
+			form.style.display = visible ? 'none' : 'block';
+			if (!visible) document.getElementById('budgetInput').focus();
+		}
+
+		async function saveBudget() {
+			const val = parseFloat(document.getElementById('budgetInput').value);
+			if (!val || val <= 0) {alert('Please enter a valid budget amount'); return;}
+			try {
+				const res = await fetch(`${BASE_URL}/user/${user.id}/budget?budget=${val}`, {
+					method: 'PUT', headers: {'Authorization': 'Bearer ' + token}
+				});
+				if (res.ok) {
+					// Update session
+					session.user.monthlyBudget = val;
+					sessionStorage.setItem('user', JSON.stringify(session));
+					document.getElementById('budgetEditForm').style.display = 'none';
+					updateBudgetWidget(val, currentMonthSpent);
+				}
+			} catch (e) {console.error(e);}
+		}
+
+		function updateBudgetWidget(budget, spent) {
+			if (!budget || budget <= 0) {
+				document.getElementById('budgetNotSet').style.display = 'block';
+				document.getElementById('budgetSet').style.display = 'none';
+				return;
+			}
+
+			document.getElementById('budgetNotSet').style.display = 'none';
+			document.getElementById('budgetSet').style.display = 'block';
+
+			const pct = Math.min((spent / budget) * 100, 100);
+			const remaining = budget - spent;
+
+			document.getElementById('budgetSpent').textContent = '₹' + spent.toLocaleString('en-IN', {minimumFractionDigits: 2});
+			document.getElementById('budgetLimit').textContent = '₹' + parseFloat(budget).toLocaleString('en-IN', {minimumFractionDigits: 2});
+			document.getElementById('budgetPct').textContent = pct.toFixed(1) + '% used';
+			document.getElementById('budgetRemaining').textContent = remaining > 0
+				? '₹' + remaining.toLocaleString('en-IN', {minimumFractionDigits: 2}) + ' remaining'
+				: 'Budget exceeded!';
+
+			// Bar colour by level
+			const bar = document.getElementById('budgetBar');
+			bar.style.width = pct + '%';
+			let color = '#3fb950';
+			if (pct >= 100) color = '#f85149';
+			else if (pct >= 90) color = '#e3b341';
+			else if (pct >= 75) color = '#e3b341';
+			bar.style.background = color;
+
+			// Badge
+			const badge = document.getElementById('budgetAlertBadge');
+			badge.style.display = 'none';
+			if (pct >= 100) {
+				badge.style.display = 'inline-block';
+				badge.style.cssText = 'display:inline-block;background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.3);color:#f85149;padding:2px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;';
+				badge.textContent = '🔴 Exceeded!';
+			} else if (pct >= 90) {
+				badge.style.display = 'inline-block';
+				badge.style.cssText = 'display:inline-block;background:rgba(227,179,65,0.15);border:1px solid rgba(227,179,65,0.3);color:#e3b341;padding:2px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;';
+				badge.textContent = '🟠 Critical!';
+			} else if (pct >= 75) {
+				badge.style.display = 'inline-block';
+				badge.style.cssText = 'display:inline-block;background:rgba(227,179,65,0.15);border:1px solid rgba(227,179,65,0.3);color:#e3b341;padding:2px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;';
+				badge.textContent = '🟡 Warning';
+			}
+		}
+
 		loadDashboard();
 		// ─── Theme toggle init
 		document.getElementById("themeToggleWrap").innerHTML = renderThemeToggle();
 	</script>
 </body>
 
-</html>	
+</html>

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,5 +66,12 @@ public class UserController {
 	@PutMapping("/changePassword")
 	public ResponseEntity<ResponseStructure<String>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
 		return userService.changePassword(request);
+	}
+
+	// PUT /user/{userId}/budget — set monthly budget
+	@PutMapping("/{userId}/budget")
+	public ResponseEntity<ResponseStructure<String>> updateBudget(@PathVariable Long userId,
+			@RequestParam java.math.BigDecimal budget) {
+		return userService.updateBudget(userId, budget);
 	}
 }

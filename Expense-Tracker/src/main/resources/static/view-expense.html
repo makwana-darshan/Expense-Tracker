@@ -473,11 +473,164 @@
 			width: 1rem;
 			height: 1rem;
 		}
+
+		/* ── Toast notifications ── */
+		.toast-container {
+			position: fixed;
+			top: 1.25rem;
+			right: 1.25rem;
+			z-index: 9999;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+
+		.toast-notif {
+			display: flex;
+			align-items: flex-start;
+			gap: 12px;
+			padding: 1rem 1.25rem;
+			position: relative;
+			overflow: hidden;
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			min-width: 300px;
+			max-width: 360px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+			animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		}
+
+		.toast-notif.hide {
+			animation: toastOut 0.25s ease forwards;
+		}
+
+		@keyframes toastIn {
+			from {
+				opacity: 0;
+				transform: translateX(60px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateX(0);
+			}
+		}
+
+		@keyframes toastOut {
+			from {
+				opacity: 1;
+				transform: translateX(0);
+			}
+
+			to {
+				opacity: 0;
+				transform: translateX(60px);
+			}
+		}
+
+		.toast-icon {
+			width: 36px;
+			height: 36px;
+			border-radius: 10px;
+			flex-shrink: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 1.1rem;
+		}
+
+		.toast-notif.success .toast-icon {
+			background: rgba(63, 185, 80, 0.15);
+			color: #3fb950;
+		}
+
+		.toast-notif.error .toast-icon {
+			background: rgba(248, 81, 73, 0.15);
+			color: var(--danger);
+		}
+
+		.toast-notif.info .toast-icon {
+			background: rgba(56, 139, 253, 0.15);
+			color: var(--info);
+		}
+
+		.toast-body {
+			flex: 1;
+		}
+
+		.toast-title {
+			font-family: 'Sora', sans-serif;
+			font-size: 0.85rem;
+			font-weight: 700;
+			margin-bottom: 2px;
+		}
+
+		.toast-notif.success .toast-title {
+			color: #3fb950;
+		}
+
+		.toast-notif.error .toast-title {
+			color: var(--danger);
+		}
+
+		.toast-notif.info .toast-title {
+			color: var(--info);
+		}
+
+		.toast-msg {
+			font-size: 0.8rem;
+			color: var(--muted);
+		}
+
+		.toast-close {
+			background: none;
+			border: none;
+			color: var(--muted);
+			cursor: pointer;
+			font-size: 0.9rem;
+			flex-shrink: 0;
+		}
+
+		.toast-close:hover {
+			color: var(--text);
+		}
+
+		.toast-bar {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			height: 3px;
+			animation: toastBar 3.5s linear forwards;
+		}
+
+		.toast-notif.success .toast-bar {
+			background: #3fb950;
+		}
+
+		.toast-notif.error .toast-bar {
+			background: var(--danger);
+		}
+
+		.toast-notif.info .toast-bar {
+			background: var(--info);
+		}
+
+		@keyframes toastBar {
+			from {
+				width: 100%
+			}
+
+			to {
+				width: 0%
+			}
+		}
 	</style>
 	<script src="theme.js"></script>
 </head>
 
 <body>
+	<div id="toastContainer" class="toast-container"></div>
 	<div class="sidebar">
 		<a href="/dashboard" style="text-decoration:none;color:inherit;">
 			<div class="sidebar-brand">
@@ -712,6 +865,23 @@
 			new bootstrap.Modal(document.getElementById('editModal')).show();
 		}
 
+		function showToast(type, title, msg) {
+			const icons = {success: 'bi-check-circle-fill', error: 'bi-x-circle-fill', info: 'bi-info-circle-fill'};
+			const t = document.createElement('div');
+			t.className = `toast-notif ${type}`;
+			t.innerHTML = `
+				<div class="toast-icon"><i class="bi ${icons[type]}"></i></div>
+				<div class="toast-body">
+					<div class="toast-title">${title}</div>
+					<div class="toast-msg">${msg}</div>
+				</div>
+				<button class="toast-close" onclick="this.parentElement.classList.add('hide')"><i class="bi bi-x"></i></button>
+				<div class="toast-bar"></div>
+			`;
+			document.getElementById('toastContainer').appendChild(t);
+			setTimeout(() => {t.classList.add('hide'); setTimeout(() => t.remove(), 250);}, 3500);
+		}
+
 		async function updateExpense() {
 			const id = document.getElementById('editId').value;
 			const btn = document.getElementById('updateBtn');
@@ -738,12 +908,14 @@
 				const data = await res.json();
 				if (res.ok) {
 					bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+					showToast('success', 'Expense Updated!', `"${payload.title}" has been updated.`);
 					loadExpenses();
 				} else {
-					alert(data.message || 'Update failed');
+					showToast('error', 'Update Failed', data.message || 'Something went wrong');
 				}
-			} catch (e) {alert('Server error');}
-			finally {
+			} catch (e) {
+				showToast('error', 'Server Error', 'Please try again.');
+			} finally {
 				btn.disabled = false; btnText.textContent = 'Update'; spinner.classList.add('d-none');
 			}
 		}
@@ -755,9 +927,15 @@
 					method: 'DELETE',
 					headers: {'Authorization': 'Bearer ' + token}
 				});
-				if (res.ok) loadExpenses();
-				else alert('Delete failed');
-			} catch (e) {alert('Server error');}
+				if (res.ok) {
+					showToast('info', 'Expense Deleted', 'The expense has been removed.');
+					loadExpenses();
+				} else {
+					showToast('error', 'Delete Failed', 'Could not delete expense.');
+				}
+			} catch (e) {
+				showToast('error', 'Server Error', 'Please try again.');
+			}
 		}
 
 		function logout() {sessionStorage.clear(); window.location.href = '/login';}
